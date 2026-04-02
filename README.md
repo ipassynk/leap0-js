@@ -2,22 +2,45 @@
 
 TypeScript SDK for [Leap0](https://leap0.dev), enterprise-grade cloud sandboxes for AI agents.
 
-This package mirrors the Python SDK shape while staying idiomatic for TypeScript: async-first, bound sandbox helpers, and small transport primitives you can build on.
+Launch isolated sandboxes in milliseconds. Give each agent its own compute, filesystem, and network boundary while keeping a simple typed Node.js API.
 
-## Install
+## Installation
 
-This SDK is Node.js-only and requires Node.js 20.6.0 or newer. It is not intended for browser runtimes.
+This SDK is Node.js-only and requires Node.js 20.6.0 or newer.
 
 ```bash
 npm install leap0
 ```
 
-## Quick start
+## Requirements
+
+- Node.js 20.6.0+
+- A Leap0 API key
+
+### Getting an API key
+
+1. Sign up at [app.leap0.dev](https://app.leap0.dev).
+2. Copy your API key from the dashboard.
+3. Set it as an environment variable:
+
+```bash
+export LEAP0_API_KEY="your-api-key"
+```
+
+Or pass it directly when creating a client:
 
 ```ts
 import { Leap0Client } from "leap0"
 
-const client = new Leap0Client({ apiKey: process.env.LEAP0_API_KEY })
+const client = new Leap0Client({ apiKey: "your-api-key" })
+```
+
+## Quick Start
+
+```ts
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 
 try {
@@ -29,19 +52,100 @@ try {
 }
 ```
 
-## Supported imports
+## Features
 
-Import from `leap0` only:
+### Code Interpreter
+
+Stateful code execution with streaming output.
+
+```ts
+import { CodeLanguage, DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME } from "leap0"
+
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME })
+const result = await sandbox.codeInterpreter.execute({ code: "x = 42", language: CodeLanguage.PYTHON })
+```
+
+### Filesystem
+
+Read, write, search, and inspect files inside a sandbox.
+
+```ts
+await sandbox.filesystem.writeFile("/workspace/hello.txt", "Hello!")
+const content = await sandbox.filesystem.readFile("/workspace/hello.txt")
+const tree = await sandbox.filesystem.tree("/workspace", 2)
+```
+
+### Git
+
+Clone repositories and run Git operations inside the sandbox.
+
+```ts
+await sandbox.git.clone("https://github.com/octocat/Hello-World.git", "/workspace/repo")
+const status = await sandbox.git.status("/workspace/repo")
+```
+
+### Process Execution
+
+Run one-off shell commands inside a running sandbox.
+
+```ts
+const result = await sandbox.process.execute({ command: "ls -la /workspace" })
+console.log(result.result)
+```
+
+### Interactive Terminal (PTY)
+
+Open persistent terminal sessions over WebSocket.
+
+```ts
+const session = await sandbox.pty.create({ cols: 120, rows: 30, cwd: "/home/user" })
+```
+
+### Language Server Protocol (LSP)
+
+Use language servers for completions and editor-style workflows.
+
+```ts
+await sandbox.lsp.start({ languageId: "python", pathToProject: "/workspace" })
+```
+
+### SSH Access
+
+Generate temporary SSH credentials for direct sandbox access.
+
+```ts
+const access = await sandbox.ssh.createAccess()
+console.log(access.hostname, access.port, access.username)
+```
+
+### Desktop Automation
+
+Control a graphical desktop inside the sandbox.
+
+```ts
+const screenshot = await sandbox.desktop.screenshot()
+```
+
+### Snapshots
+
+Save and restore sandbox state.
+
+```ts
+const snapshot = await client.snapshots.create(sandbox, { name: "my-checkpoint" })
+const restored = await client.snapshots.resume({ snapshotName: snapshot.name ?? "my-checkpoint" })
+```
+
+## Supported Imports
+
+Import clients, enums, and types from the package root:
 
 ```ts
 import { Leap0Client, SandboxState, type CreateSandboxParams } from "leap0"
 ```
 
-Deep imports such as `leap0/models`, `leap0/services`, or `leap0/dist/...` are not part of the supported public API.
-
 ## Examples
 
-See the [`examples/`](examples/) directory for complete usage examples:
+See `examples/` for end-to-end usage patterns:
 
 - **[`quickstart.ts`](examples/quickstart.ts)** - Basic code execution
 - **[`code_interpreter_stream.ts`](examples/code_interpreter_stream.ts)** - Streaming code execution output
@@ -51,26 +155,16 @@ See the [`examples/`](examples/) directory for complete usage examples:
 - **[`snapshots.ts`](examples/snapshots.ts)** - Save and restore sandbox state
 - **[`ssh.ts`](examples/ssh.ts)** - Generate and validate SSH access
 
-## Status
-
-This is an initial SDK foundation with the same major resource groups as the Python SDK:
-
-- sandboxes
-- snapshots
-- templates
-- filesystem
-- git
-- process
-- pty
-- lsp
-- ssh
-- code interpreter
-- desktop
-
-The public API is exported from `src/index.ts` and compiles to `dist/`.
-
-## Runtime support
+## Runtime Support
 
 - Node.js 20.6.0+
 - ESM package (`"type": "module"`)
-- Uses Node-specific APIs such as `process.env`, OpenTelemetry Node providers, and `User-Agent` request headers
+- Uses Node-specific APIs including `process.env`, OpenTelemetry Node providers, and `User-Agent` request headers
+
+## Documentation
+
+Full documentation is available at [leap0.dev/docs](https://leap0.dev/docs).
+
+## License
+
+Apache License 2.0. See `LICENSE` for details.
