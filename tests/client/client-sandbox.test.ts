@@ -122,6 +122,45 @@ test("Sandbox binds service methods to itself", async () => {
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
 });
 
+test("Sandbox refresh rejects invalid sandbox states", async () => {
+  const sandbox = new Sandbox(
+    {
+      sandboxes: {
+        get: async () => ({
+          id: "sb-1",
+          templateId: "tpl-1",
+          state: "not-real",
+          vcpu: 1,
+          memoryMib: 1024,
+          diskMib: 4096,
+          createdAt: "2026-01-01T00:00:00Z",
+        }),
+      },
+      [SERVICES]: {
+        filesystem: {},
+        git: {},
+        process: {},
+        pty: {},
+        lsp: {},
+        ssh: {},
+        codeInterpreter: {},
+        desktop: {},
+      },
+    } as never,
+    {
+      id: "sb-1",
+      templateId: "tpl-1",
+      state: "running",
+      vcpu: 1,
+      memoryMib: 1024,
+      diskMib: 4096,
+      createdAt: "2026-01-01T00:00:00Z",
+    },
+  );
+
+  await assert.rejects(() => sandbox.refresh(), /Expected this\.client\.sandboxes\.get\(\) to return SandboxData or Sandbox/);
+});
+
 test("client and sandbox helpers stay strongly typed", () => {
   expectTypeOf<ReturnType<Leap0Client["sandboxes"]["create"]>>().toMatchTypeOf<
     Promise<{ id: string }>
@@ -136,4 +175,8 @@ test("client and sandbox helpers stay strongly typed", () => {
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
     [accessId: string, password: string, options?: RequestOptions]
   >();
+  expectTypeOf<Sandbox["templateName"]>().toEqualTypeOf<string | undefined>();
+  expectTypeOf<Sandbox["timeoutMin"]>().toEqualTypeOf<number | undefined>();
+  expectTypeOf<Sandbox["envVars"]>().toEqualTypeOf<Record<string, string> | undefined>();
+  expectTypeOf<Sandbox["updatedAt"]>().toEqualTypeOf<string | undefined>();
 });

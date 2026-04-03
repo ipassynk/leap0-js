@@ -224,6 +224,7 @@ export class GitClient {
       path: string;
       branch: string;
       create?: boolean;
+      setUpstream?: boolean;
     },
     options?: RequestOptions,
   ): Promise<GitResult> {
@@ -232,7 +233,12 @@ export class GitClient {
       await this.json(
         sandbox,
         "checkout-branch",
-        compact({ path: params.path, branch: params.branch, create: params.create }),
+        compact({
+          path: params.path,
+          branch: params.branch,
+          create: params.create,
+          set_upstream: params.setUpstream,
+        }),
         options,
       ),
     );

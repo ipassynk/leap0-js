@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { createTemplateParamsSchema, RegistryCredentialType } from "@/models/template.js";
+import {
+  createTemplateParamsSchema,
+  RegistryCredentialType,
+  templateDataSchema,
+} from "@/models/template.js";
 import { TemplatesClient } from "@/services/templates.js";
 
 test("accepts basic registry credentials", () => {
@@ -85,4 +89,17 @@ test("TemplatesClient validates credentials before transport", async () => {
   );
 
   assert.equal(called, false);
+});
+
+test("template data accepts image configs without entrypoint or cmd", () => {
+  const parsed = templateDataSchema.parse({
+    id: "tpl-1",
+    name: "custom",
+    digest: "sha256:abc",
+    imageConfig: { env: { APP_ENV: "test" } },
+    isSystem: false,
+    createdAt: "2026-01-01T00:00:00Z",
+  });
+
+  assert.deepEqual(parsed.imageConfig, { env: { APP_ENV: "test" } });
 });

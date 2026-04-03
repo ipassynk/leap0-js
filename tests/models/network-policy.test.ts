@@ -45,3 +45,24 @@ test("createSandboxParamsSchema accepts network policy modes", () => {
   assert.equal(denyAll.networkPolicy?.mode, NetworkPolicyMode.DENY_ALL);
   assert.equal(custom.networkPolicy?.mode, NetworkPolicyMode.CUSTOM);
 });
+
+test("network policy schema enforces backend domain and cidr rules", () => {
+  assert.throws(() =>
+    createSandboxParamsSchema.parse({
+      networkPolicy: { mode: NetworkPolicyMode.CUSTOM, allowedDomains: ["localhost"] },
+    }),
+  );
+  assert.throws(() =>
+    createSandboxParamsSchema.parse({
+      networkPolicy: { mode: NetworkPolicyMode.CUSTOM, allowedCidrs: ["not-a-cidr"] },
+    }),
+  );
+  assert.throws(() =>
+    createSandboxParamsSchema.parse({
+      networkPolicy: {
+        mode: NetworkPolicyMode.CUSTOM,
+        transforms: [{ domain: "bad domain" }],
+      },
+    }),
+  );
+});

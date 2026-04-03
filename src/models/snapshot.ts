@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { networkPolicySchema, sandboxStateSchema } from "@/models/sandbox.js";
 
+const snapshotNameSchema = z.string().trim().min(1).max(64);
+
 export const snapshotDataSchema = z
   .object({
     id: z.string(),
@@ -17,14 +19,14 @@ export const snapshotDataSchema = z
 export type SnapshotData = z.infer<typeof snapshotDataSchema>;
 
 export const createSnapshotParamsSchema = z.object({
-  name: z.string().optional(),
+  name: snapshotNameSchema.optional(),
 });
 export type CreateSnapshotParams = z.infer<typeof createSnapshotParamsSchema>;
 
 export const resumeSnapshotParamsSchema = z.object({
-  snapshotName: z.string(),
+  snapshotName: snapshotNameSchema,
   autoPause: z.boolean().optional(),
-  timeoutMin: z.number().int().positive().optional(),
+  timeoutMin: z.number().int().min(1).max(480).optional(),
   networkPolicy: networkPolicySchema.optional(),
 });
 export type ResumeSnapshotParams = z.infer<typeof resumeSnapshotParamsSchema>;

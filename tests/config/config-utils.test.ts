@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, beforeEach, test } from "vitest";
 
 import { resolveConfig } from "@/config/index.js";
+import { Leap0Error } from "@/core/errors.js";
 import {
   ensureLeadingSlash,
   sandboxBaseUrl,
@@ -84,6 +85,18 @@ test("resolveConfig enables sdk otel from standard OTEL env", () => {
   assert.equal(config.sdkOtelEnabled, true);
 });
 
+test("resolveConfig accepts case-insensitive sdk otel env values and rejects invalid strings", () => {
+  process.env.LEAP0_API_KEY = "env-key";
+  process.env.LEAP0_SDK_OTEL_ENABLED = "TrUe";
+  assert.equal(resolveConfig().sdkOtelEnabled, true);
+
+  process.env.LEAP0_SDK_OTEL_ENABLED = "FaLsE";
+  assert.equal(resolveConfig().sdkOtelEnabled, false);
+
+  process.env.LEAP0_SDK_OTEL_ENABLED = "maybe";
+  assert.throws(() => resolveConfig(), /Invalid LEAP0_SDK_OTEL_ENABLED value: maybe/);
+});
+
 test("resolveConfig respects explicit sdk otel disable", () => {
   process.env.LEAP0_API_KEY = "env-key";
   process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318";
@@ -93,9 +106,9 @@ test("resolveConfig respects explicit sdk otel disable", () => {
 });
 
 test("resolveConfig rejects invalid config", () => {
-  assert.throws(() => resolveConfig({ timeout: -1, apiKey: "key" }));
-  assert.throws(() => resolveConfig({ apiKey: "   " }));
-  assert.throws(() => resolveConfig({ apiKey: "key", authHeader: "   " }));
+  assert.throws(() => resolveConfig({ timeout: -1, apiKey: "key" }), Leap0Error);
+  assert.throws(() => resolveConfig({ apiKey: "   " }), Leap0Error);
+  assert.throws(() => resolveConfig({ apiKey: "key", authHeader: "   " }), Leap0Error);
 });
 
 test("utility helpers normalize refs and urls", () => {

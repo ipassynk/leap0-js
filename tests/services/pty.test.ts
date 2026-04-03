@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { Leap0WebSocketError } from "@/core/errors.js";
+import type { RequestOptions } from "@/models/index.js";
 import { PtyClient, PtyConnection } from "@/services/pty.js";
 import { createRecordedTransport } from "@tests/utils/helpers.ts";
 
 test("pty client sends expected request shapes", async () => {
   const { transport, calls } = createRecordedTransport({
-    requestJson: async (path: string, init: RequestInit, options: never) => {
+    requestJson: async (path: string, init: RequestInit, options: RequestOptions = {}) => {
       calls.push({ path, init, options });
       const session = {
         id: "sess-1",
@@ -42,7 +43,8 @@ test("pty client sends expected request shapes", async () => {
 test("pty connection sends, receives, and closes websocket data", async () => {
   let sent: unknown;
   let closed = false;
-  const handlers = new Map<string, (event: { data?: unknown }) => void>();
+  type MockListener = (event?: { data?: unknown }) => void;
+  const handlers = new Map<string, MockListener[]>();
   const socket = {
     send(data: unknown) {
       sent = data;
@@ -50,17 +52,26 @@ test("pty connection sends, receives, and closes websocket data", async () => {
     close() {
       closed = true;
     },
-    addEventListener(type: string, handler: (event: { data?: unknown }) => void) {
-      handlers.set(type, handler);
+    addEventListener(type: string, handler: MockListener) {
+      handlers.set(type, [...(handlers.get(type) ?? []), handler]);
     },
-    removeEventListener(type: string) {
-      handlers.delete(type);
+    removeEventListener(type: string, handler?: EventListenerOrEventListenerObject | null) {
+      if (handler == null) {
+        handlers.delete(type);
+        return;
+      }
+      const next = (handlers.get(type) ?? []).filter((registered) => registered !== handler);
+      if (next.length === 0) {
+        handlers.delete(type);
+        return;
+      }
+      handlers.set(type, next);
     },
   };
   const connection = new PtyConnection(socket as never);
   connection.send("hello");
   const recv = connection.recv();
-  handlers.get("message")?.({ data: "world" });
+  handlers.get("message")?.[0]?.({ data: "world" });
   assert.equal(sent, "hello");
   assert.deepEqual(Array.from(await recv), Array.from(new TextEncoder().encode("world")));
   connection.close();
@@ -68,21 +79,31 @@ test("pty connection sends, receives, and closes websocket data", async () => {
 });
 
 test("pty connection rejects recv when websocket closes first", async () => {
-  const handlers = new Map<string, (event?: { data?: unknown }) => void>();
+  type MockListener = (event?: { data?: unknown }) => void;
+  const handlers = new Map<string, MockListener[]>();
   const socket = {
     send() {},
     close() {},
-    addEventListener(type: string, handler: (event?: { data?: unknown }) => void) {
-      handlers.set(type, handler);
+    addEventListener(type: string, handler: MockListener) {
+      handlers.set(type, [...(handlers.get(type) ?? []), handler]);
     },
-    removeEventListener(type: string) {
-      handlers.delete(type);
+    removeEventListener(type: string, handler?: EventListenerOrEventListenerObject | null) {
+      if (handler == null) {
+        handlers.delete(type);
+        return;
+      }
+      const next = (handlers.get(type) ?? []).filter((registered) => registered !== handler);
+      if (next.length === 0) {
+        handlers.delete(type);
+        return;
+      }
+      handlers.set(type, next);
     },
   };
   const connection = new PtyConnection(socket as never);
 
   const recv = connection.recv();
-  handlers.get("close")?.();
+  handlers.get("close")?.[0]?.();
 
   await assert.rejects(recv, (error: unknown) => {
     assert.ok(error instanceof Leap0WebSocketError);

@@ -1,8 +1,10 @@
+import { ZodError } from "zod";
 import {
   DEFAULT_BASE_URL,
   DEFAULT_CLIENT_TIMEOUT,
   DEFAULT_SANDBOX_DOMAIN,
 } from "@/config/constants.js";
+import { Leap0Error } from "@/core/errors.js";
 import {
   apiKeyRequiredSchema,
   authHeaderSchema,
@@ -21,13 +23,35 @@ function readEnv(name: string): string | undefined {
 }
 
 function resolveSdkOtelFromEnv(envOtel: string | undefined): boolean {
-  if (envOtel === "true") {
+  const normalizedOtel = envOtel?.trim();
+  if (normalizedOtel === undefined || normalizedOtel === "") {
+    return Boolean(readEnv("OTEL_EXPORTER_OTLP_ENDPOINT"));
+  }
+  const lowered = normalizedOtel.toLowerCase();
+  if (lowered === "true") {
     return true;
   }
-  if (envOtel === "false") {
+  if (lowered === "false") {
     return false;
   }
-  return Boolean(readEnv("OTEL_EXPORTER_OTLP_ENDPOINT"));
+  throw new Error(`Invalid LEAP0_SDK_OTEL_ENABLED value: ${normalizedOtel}`);
+}
+
+function wrapConfigError(error: unknown): never {
+  if (error instanceof ZodError) {
+    throw new Leap0Error(`Invalid Leap0 config: ${error.issues.map((issue) => issue.message).join("; ")}`, {
+      cause: error,
+      body: error.issues,
+    });
+  }
+  throw error;
+}
+
+function parseConfigOrThrow<T>(result: { success: true; data: T } | { success: false; error: ZodError }): T {
+  if (result.success) {
+    return result.data;
+  }
+  wrapConfigError(result.error);
 }
 
 /**
@@ -40,28 +64,31 @@ function resolveSdkOtelFromEnv(envOtel: string | undefined): boolean {
  *   The validated runtime configuration used by the SDK.
  */
 export function resolveConfig(input: Leap0ConfigInput = {}): Leap0ConfigResolved {
-  leap0ConfigInputSchema.parse(input);
+  try {
+    parseConfigOrThrow(leap0ConfigInputSchema.safeParse(input));
+    const apiKey = apiKeyRequiredSchema.parse(input.apiKey ?? readEnv("LEAP0_API_KEY"));
+    const baseUrl = trimSlash(
+      (input.baseUrl ?? readEnv("LEAP0_BASE_URL") ?? DEFAULT_BASE_URL).trim(),
+    );
+    const sandboxDomain = trimSlash(
+      (input.sandboxDomain ?? readEnv("LEAP0_SANDBOX_DOMAIN") ?? DEFAULT_SANDBOX_DOMAIN).trim(),
+    );
+    const timeout = timeoutSchema.parse(input.timeout ?? DEFAULT_CLIENT_TIMEOUT);
+    const authHeader = authHeaderSchema.parse(input.authHeader ?? "authorization");
+    const bearer = input.bearer ?? true;
+    const envOtel = readEnv("LEAP0_SDK_OTEL_ENABLED");
+    const sdkOtelEnabled = input.sdkOtelEnabled ?? resolveSdkOtelFromEnv(envOtel);
 
-  const apiKey = apiKeyRequiredSchema.parse(input.apiKey ?? readEnv("LEAP0_API_KEY"));
-  const baseUrl = trimSlash(
-    (input.baseUrl ?? readEnv("LEAP0_BASE_URL") ?? DEFAULT_BASE_URL).trim(),
-  );
-  const sandboxDomain = trimSlash(
-    (input.sandboxDomain ?? readEnv("LEAP0_SANDBOX_DOMAIN") ?? DEFAULT_SANDBOX_DOMAIN).trim(),
-  );
-  const timeout = timeoutSchema.parse(input.timeout ?? DEFAULT_CLIENT_TIMEOUT);
-  const authHeader = authHeaderSchema.parse(input.authHeader ?? "authorization");
-  const bearer = input.bearer ?? true;
-  const envOtel = readEnv("LEAP0_SDK_OTEL_ENABLED");
-  const sdkOtelEnabled = input.sdkOtelEnabled ?? resolveSdkOtelFromEnv(envOtel);
-
-  return leap0ConfigResolvedSchema.parse({
-    apiKey,
-    baseUrl,
-    sandboxDomain,
-    timeout,
-    authHeader,
-    bearer,
-    sdkOtelEnabled,
-  });
+    return parseConfigOrThrow(leap0ConfigResolvedSchema.safeParse({
+      apiKey,
+      baseUrl,
+      sandboxDomain,
+      timeout,
+      authHeader,
+      bearer,
+      sdkOtelEnabled,
+    }));
+  } catch (error) {
+    wrapConfigError(error);
+  }
 }

@@ -42,16 +42,15 @@ export class TemplatesClient {
     template: TemplateRef,
     params: RenameTemplateParams,
     options: RequestOptions = {},
-  ): Promise<TemplateData> {
+  ): Promise<void> {
     const parsed = renameTemplateParamsSchema.parse(params);
     this.validateTemplateName(parsed.name);
-    return withErrorPrefix("Failed to rename template: ", async () => {
-      const data = await this.transport.requestJson<TemplateData>(
+    await withErrorPrefix("Failed to rename template: ", async () => {
+      await this.transport.request(
         `/v1/template/${templateIdOf(template)}`,
         { method: "PATCH", body: jsonBody(parsed) },
         options,
       );
-      return normalize(templateDataSchema, data);
     });
   }
 

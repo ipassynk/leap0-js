@@ -82,6 +82,29 @@ test("desktop statusStream parses SSE and raises API errors", async () => {
   // health endpoint tested separately, it accepts 503 gracefully
 });
 
+test("desktop statusStream throws Leap0Error for SSE error frames", async () => {
+  const { transport } = createRecordedTransport({
+    streamJsonUrl: async function* () {
+      yield { error: "Desktop request failed" };
+    },
+  });
+  const client = new DesktopClient(transport as never);
+
+  await assert.rejects(
+    async () => {
+      for await (const _event of client.statusStream("sb-1")) {
+        // consume stream
+      }
+    },
+    (error: unknown) => {
+      assert.ok(error instanceof Leap0Error);
+      assert.equal(error.message, "Desktop status stream error");
+      assert.equal(error.body, "Desktop request failed");
+      return true;
+    },
+  );
+});
+
 test("desktop waitUntilReady treats count-only updates as ready", async () => {
   const { transport } = createRecordedTransport({
     streamJsonUrl: async function* () {
@@ -114,4 +137,15 @@ test("desktop waitUntilReady ignores zero total count updates", async () => {
   const client = new DesktopClient(transport as never);
 
   await client.waitUntilReady("sb-1", 1);
+});
+
+test("desktop client validates request payloads before transport", async () => {
+  const { transport, calls } = createRecordedTransport();
+  const client = new DesktopClient(transport as never);
+
+  await assert.rejects(() => client.resizeScreen("sb-1", { width: 100, height: 720 }));
+  await assert.rejects(() => client.screenshot("sb-1", { width: 100 }));
+  await assert.rejects(() => client.screenshotRegion("sb-1", { x: 0, y: 0, width: 0, height: 10 }));
+  await assert.rejects(() => client.click("sb-1", { x: 10 }));
+  assert.equal(calls.length, 0);
 });

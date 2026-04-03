@@ -26,6 +26,7 @@ import type {
 import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { sandboxBaseUrl, sandboxIdOf } from "@/core/utils.js";
 import {
+  desktopClickParamsSchema,
   desktopDisplayInfoSchema,
   desktopHealthSchema,
   desktopPointerPositionSchema,
@@ -36,6 +37,9 @@ import {
   desktopProcessStatusSchema,
   desktopRecordingStatusSchema,
   desktopRecordingSummarySchema,
+  desktopScreenshotParamsSchema,
+  desktopScreenshotRegionParamsSchema,
+  desktopSetScreenParamsSchema,
   desktopWindowSchema,
 } from "@/models/desktop.js";
 import { asRecord } from "@/services/shared.js";
@@ -90,11 +94,12 @@ export class DesktopClient {
     payload: DesktopSetScreenParams,
     options?: RequestOptions,
   ): Promise<DesktopDisplayInfo> {
+    const parsed = desktopSetScreenParamsSchema.parse(payload);
     return this.requestJson(
       sandbox,
       desktopDisplayInfoSchema,
       "/api/display/screen",
-      { method: "POST", body: jsonBody(payload) },
+      { method: "POST", body: jsonBody(parsed) },
       options,
     );
   }
@@ -112,10 +117,11 @@ export class DesktopClient {
     params: DesktopScreenshotParams = {},
     options?: RequestOptions,
   ): Promise<Uint8Array> {
+    const parsed = desktopScreenshotParamsSchema.parse(params);
     return await this.transport.requestBytesUrl(
       this.requestUrl(sandbox, "/api/screenshot"),
       { method: "GET" },
-      { ...options, query: params },
+      { ...options, query: parsed },
     );
   }
   async screenshotRegion(
@@ -123,9 +129,10 @@ export class DesktopClient {
     payload: DesktopScreenshotRegionParams,
     options?: RequestOptions,
   ): Promise<Uint8Array> {
+    const parsed = desktopScreenshotRegionParamsSchema.parse(payload);
     return await this.transport.requestBytesUrl(
       this.requestUrl(sandbox, "/api/screenshot/region"),
-      { method: "POST", body: jsonBody(payload) },
+      { method: "POST", body: jsonBody(parsed) },
       options,
     );
   }
@@ -160,11 +167,12 @@ export class DesktopClient {
     params: DesktopClickParams = {},
     options?: RequestOptions,
   ): Promise<DesktopPointerPosition> {
+    const parsed = desktopClickParamsSchema.parse(params);
     return this.requestJson(
       sandbox,
       desktopPointerPositionSchema,
       "/api/input/click",
-      { method: "POST", body: jsonBody(params) },
+      { method: "POST", body: jsonBody(parsed) },
       options,
     );
   }

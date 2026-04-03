@@ -1,4 +1,5 @@
 import type { SandboxData, SandboxState } from "@/models/index.js";
+import { sandboxStateSchema } from "@/models/sandbox.js";
 import {
   CodeInterpreterClient,
   DesktopClient,
@@ -23,7 +24,7 @@ function isSandboxData(value: unknown): value is SandboxData {
   return (
     typeof record.id === "string" &&
     typeof record.templateId === "string" &&
-    typeof record.state === "string" &&
+    sandboxStateSchema.safeParse(record.state).success &&
     typeof record.vcpu === "number" &&
     typeof record.memoryMib === "number" &&
     typeof record.diskMib === "number" &&
@@ -86,13 +87,17 @@ class SandboxServiceProxy<Service extends object> {
 export class Sandbox implements SandboxData {
   id!: string;
   templateId!: string;
+  templateName?: string;
   state!: SandboxState;
   vcpu!: number;
   memoryMib!: number;
   diskMib!: number;
+  timeoutMin?: number;
   autoPause?: boolean;
+  envVars?: Record<string, string>;
   networkPolicy?: SandboxData["networkPolicy"];
   createdAt!: string;
+  updatedAt?: string;
   [key: string]: unknown;
 
   readonly filesystem: BoundSandboxService<FilesystemClient>;
@@ -133,13 +138,17 @@ export class Sandbox implements SandboxData {
   private update(data: SandboxData): this {
     this.id = data.id;
     this.templateId = data.templateId;
+    this.templateName = data.templateName;
     this.state = data.state;
     this.vcpu = data.vcpu;
     this.memoryMib = data.memoryMib;
     this.diskMib = data.diskMib;
+    this.timeoutMin = data.timeoutMin;
     this.autoPause = data.autoPause;
+    this.envVars = data.envVars;
     this.networkPolicy = data.networkPolicy;
     this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
     return this;
   }
 

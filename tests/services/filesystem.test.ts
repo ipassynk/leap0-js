@@ -92,3 +92,38 @@ test("filesystem setPermissions rejects empty updates before transport", async (
   );
   assert.equal(calls.length, 0);
 });
+
+test("filesystem setPermissions rejects blank string updates before transport", async () => {
+  const { transport, calls } = createRecordedTransport();
+  const client = new FilesystemClient(transport as never);
+
+  await assert.rejects(() => client.setPermissions("sb-1", "/tmp/a.txt", { mode: "   " }));
+  await assert.rejects(() => client.setPermissions("sb-1", "/tmp/a.txt", { owner: "" }));
+  await assert.rejects(() => client.setPermissions("sb-1", "/tmp/a.txt", { group: "  " }));
+  assert.equal(calls.length, 0);
+});
+
+test("filesystem readFilesBytes fails on unexpected non-blob form parts", async () => {
+  const form = new FormData();
+  form.append("/tmp/meta.json", "not-a-file");
+  const client = new FilesystemClient({
+    ...createRecordedTransport().transport,
+    request: async () => new Response(form),
+  } as never);
+
+  await assert.rejects(
+    () => client.readFilesBytes("sb-1", ["/tmp/meta.json"]),
+    /Failed to parse \/read-files response: expected Blob\/File for entry "\/tmp\/meta.json", received string/,
+  );
+});
+
+test("filesystem readFile rejects head and tail together", async () => {
+  const { transport, calls } = createRecordedTransport();
+  const client = new FilesystemClient(transport as never);
+
+  await assert.rejects(
+    () => client.readFile("sb-1", "/tmp/a.txt", { head: 1, tail: 1 }),
+    /read-file head and tail are mutually exclusive/,
+  );
+  assert.equal(calls.length, 0);
+});

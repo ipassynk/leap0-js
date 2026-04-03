@@ -13,8 +13,8 @@ export const RegistryCredentialType = {
 
 export const templateImageConfigSchema = z
   .object({
-    entrypoint: z.array(z.string()).nullable(),
-    cmd: z.array(z.string()).nullable(),
+    entrypoint: z.array(z.string()).nullable().optional(),
+    cmd: z.array(z.string()).nullable().optional(),
     workingDir: z.string().optional(),
     user: z.string().optional(),
     env: z.record(z.string(), z.string()).nullable().optional(),
@@ -88,7 +88,7 @@ export const createTemplateParamsSchema = z.object({
 export type CreateTemplateParams = z.infer<typeof createTemplateParamsSchema>;
 
 export const templateNameSchema = z.string().superRefine((name, ctx) => {
-  if (!name.trim() || name.length > 64 || /\s/.test(name) || name.startsWith("system/")) {
+  if (!name.trim() || name.length > 64 || /\s/.test(name) || name.toLowerCase().startsWith("system/")) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: TEMPLATE_NAME_ERROR_MESSAGE,
@@ -110,7 +110,8 @@ export const createTemplateRequestSchema = createTemplateParamsSchema.extend({
   uri: templateUriSchema,
 });
 
+export const renameTemplateNameSchema = z.string().min(1).max(64);
 export const renameTemplateParamsSchema = z.object({
-  name: templateNameSchema,
+  name: renameTemplateNameSchema,
 });
 export type RenameTemplateParams = z.infer<typeof renameTemplateParamsSchema>;

@@ -29,3 +29,16 @@ test("client skips otel initialization when disabled", async () => {
     await client.close();
   }
 });
+
+test("client shuts down otel on close and swallows shutdown errors", async () => {
+  vi.spyOn(otelModule, "initOtel").mockImplementation(() => {});
+  const shutdownSpy = vi.spyOn(otelModule, "shutdownOtel").mockRejectedValue(new Error("boom"));
+  const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+  const client = new Leap0Client({ apiKey: "key", sdkOtelEnabled: true });
+  await client.close();
+  await client.close();
+
+  assert.equal(shutdownSpy.mock.calls.length, 1);
+  assert.equal(warnSpy.mock.calls.length, 1);
+});

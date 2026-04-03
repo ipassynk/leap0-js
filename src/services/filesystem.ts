@@ -25,6 +25,17 @@ import { sandboxIdOf } from "@/core/utils.js";
 
 type JsonObject = Record<string, unknown>;
 
+function assertReadFileParams(params: {
+  offset?: number;
+  limit?: number;
+  head?: number;
+  tail?: number;
+}): void {
+  if (params.head !== undefined && params.tail !== undefined) {
+    throw new Error("read-file head and tail are mutually exclusive");
+  }
+}
+
 function compact(obj: JsonObject): JsonObject {
   const result: JsonObject = {};
   for (const [key, value] of Object.entries(obj)) {
@@ -158,6 +169,7 @@ export class FilesystemClient {
     params: { offset?: number; limit?: number; head?: number; tail?: number } = {},
     options: RequestOptions = {},
   ): Promise<Uint8Array> {
+    assertReadFileParams(params);
     return await this.transport.requestBytes(
       this.fsPath(sandbox, "read-file"),
       { method: "POST", body: jsonBody(compact({ path, ...params })) },
@@ -172,6 +184,7 @@ export class FilesystemClient {
     params: { offset?: number; limit?: number; head?: number; tail?: number } = {},
     options: RequestOptions = {},
   ): Promise<string> {
+    assertReadFileParams(params);
     return await this.transport.requestText(
       this.fsPath(sandbox, "read-file"),
       { method: "POST", body: jsonBody(compact({ path, ...params })) },
@@ -194,9 +207,13 @@ export class FilesystemClient {
     const formData = await response.formData();
     const result: Record<string, Uint8Array> = {};
     for (const [name, value] of formData.entries()) {
-      if (value instanceof Blob) {
-        result[name] = new Uint8Array(await value.arrayBuffer());
+      if (!(value instanceof Blob)) {
+        const valueType = typeof value;
+        throw new Error(
+          `Failed to parse /read-files response: expected Blob/File for entry "${name}", received ${valueType}`,
+        );
       }
+      result[name] = new Uint8Array(await value.arrayBuffer());
     }
     return result;
   }

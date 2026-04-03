@@ -1,6 +1,6 @@
 import { resolveConfig } from "@/config/index.js";
 import type { Leap0ConfigInput } from "@/models/index.js";
-import { initOtel } from "@/core/otel.js";
+import { initOtel, shutdownOtel } from "@/core/otel.js";
 import { Leap0Transport } from "@/core/transport.js";
 import {
   CodeInterpreterClient,
@@ -34,6 +34,8 @@ export interface ClientServices {
  * Top-level Leap0 SDK client that exposes all service groups.
  */
 export class Leap0Client {
+  private closed = false;
+  private readonly sdkOtelEnabled: boolean;
   private readonly transport: Leap0Transport;
 
   readonly sandboxes: SandboxesClient<Sandbox>;
@@ -47,6 +49,7 @@ export class Leap0Client {
   constructor(config: Leap0ConfigInput = {}) {
     const resolved = resolveConfig(config);
     this.transport = new Leap0Transport(resolved);
+    this.sdkOtelEnabled = resolved.sdkOtelEnabled;
     if (resolved.sdkOtelEnabled) {
       initOtel();
     }
@@ -71,7 +74,18 @@ export class Leap0Client {
 
   /** Closes the underlying transport. */
   async close(): Promise<void> {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
     await this.transport.close();
+    if (this.sdkOtelEnabled) {
+      try {
+        await shutdownOtel();
+      } catch (error) {
+        console.warn("Failed to shutdown OpenTelemetry providers", error);
+      }
+    }
   }
 }
 

@@ -30,18 +30,70 @@ export const networkPolicyModeSchema = z.enum([
 ]);
 export type NetworkPolicyMode = z.infer<typeof networkPolicyModeSchema>;
 
+function isValidDomainPattern(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  const host = trimmed.startsWith("*.") ? trimmed.slice(2) : trimmed;
+  if (!host || host.startsWith(".") || host.endsWith(".")) {
+    return false;
+  }
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host) || host.includes(":")) {
+    return false;
+  }
+
+  const labels = host.split(".");
+  if (labels.length < 2) {
+    return false;
+  }
+  return labels.every(
+    (label) =>
+      label.length > 0 &&
+      !label.startsWith("-") &&
+      !label.endsWith("-") &&
+      /^[A-Za-z0-9-]+$/.test(label),
+  );
+}
+
+function isValidCidr(value: string): boolean {
+  const [address, prefix] = value.split("/");
+  if (!address || prefix === undefined || !/^\d+$/.test(prefix)) {
+    return false;
+  }
+  const octets = address.split(".");
+  if (octets.length !== 4) {
+    return false;
+  }
+  if (!octets.every((octet) => /^\d+$/.test(octet) && Number(octet) >= 0 && Number(octet) <= 255)) {
+    return false;
+  }
+  const prefixNumber = Number(prefix);
+  return prefixNumber >= 0 && prefixNumber <= 32;
+}
+
+const domainPatternSchema = z.string().refine(isValidDomainPattern, {
+  message: "domain must be a valid domain pattern",
+});
+
+const cidrSchema = z.string().refine(isValidCidr, {
+  message: "CIDR must be a valid IPv4 CIDR block",
+});
+
 export const networkPolicySchema = z.object({
   mode: networkPolicyModeSchema,
-  allowedDomains: z.array(z.string()).optional(),
-  allowedCidrs: z.array(z.string()).optional(),
+  allowedDomains: z.array(domainPatternSchema).max(50).optional(),
+  allowedCidrs: z.array(cidrSchema).max(10).optional(),
   transforms: z
     .array(
       z.object({
-        domain: z.string(),
+        domain: domainPatternSchema,
         injectHeaders: z.record(z.string(), z.string()).optional(),
         stripHeaders: z.array(z.string()).optional(),
       }),
     )
+    .max(20)
     .optional(),
 });
 export type NetworkPolicy = z.infer<typeof networkPolicySchema>;
@@ -61,13 +113,17 @@ export const sandboxDataSchema = z
   .object({
     id: z.string(),
     templateId: z.string(),
+    templateName: z.string().optional(),
     state: sandboxStateSchema,
     vcpu: z.number(),
     memoryMib: z.number(),
     diskMib: z.number(),
+    timeoutMin: z.number().optional(),
     autoPause: z.boolean().optional(),
+    envVars: z.record(z.string(), z.string()).optional(),
     networkPolicy: networkPolicySchema.optional(),
     createdAt: z.string(),
+    updatedAt: z.string().optional(),
   })
   .catchall(z.unknown());
 export type SandboxData = z.infer<typeof sandboxDataSchema>;

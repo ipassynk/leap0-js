@@ -53,3 +53,15 @@ test("snapshots client sends expected request shapes", async () => {
   assert.equal(restored.templateId, "tpl-1");
   assert.equal(calls[3]?.path, "/v1/snapshot/snap-1");
 });
+
+test("snapshots client validates snapshot names before transport", async () => {
+  const { transport, calls } = createRecordedTransport();
+  const client = new SnapshotsClient(transport as never);
+
+  await assert.rejects(() => client.create("sb-1", { name: "" }));
+  await assert.rejects(() => client.create("sb-1", { name: "   " }));
+  await assert.rejects(() => client.resume({ snapshotName: "" }));
+  await assert.rejects(() => client.resume({ snapshotName: "   " }));
+  await assert.rejects(() => client.resume({ snapshotName: "snap-a", timeoutMin: 999 }));
+  assert.equal(calls.length, 0);
+});
