@@ -49,7 +49,10 @@ export class FilesystemClient {
   ): Promise<LsResult> {
     const data = await this.transport.requestJson<LsResult>(
       this.fsPath(sandbox, "ls"),
-      { method: "POST", body: jsonBody(compact({ path, recursive: params.recursive, exclude: params.exclude })) },
+      {
+        method: "POST",
+        body: jsonBody(compact({ path, recursive: params.recursive, exclude: params.exclude })),
+      },
       options,
     );
     return normalize(lsResultSchema, data);
@@ -74,7 +77,12 @@ export class FilesystemClient {
   ): Promise<void> {
     await this.transport.request(
       this.fsPath(sandbox, "mkdir"),
-      { method: "POST", body: jsonBody(compact({ path, recursive: params.recursive, permissions: params.permissions })) },
+      {
+        method: "POST",
+        body: jsonBody(
+          compact({ path, recursive: params.recursive, permissions: params.permissions }),
+        ),
+      },
       options,
     );
   }
@@ -108,13 +116,7 @@ export class FilesystemClient {
     params: { permissions?: string } = {},
     options: RequestOptions = {},
   ): Promise<void> {
-    await this.writeBytes(
-      sandbox,
-      path,
-      new TextEncoder().encode(content),
-      params,
-      options,
-    );
+    await this.writeBytes(sandbox, path, new TextEncoder().encode(content), params, options);
   }
 
   /** Writes multiple files in a single request using multipart upload. */
@@ -236,7 +238,12 @@ export class FilesystemClient {
   ): Promise<void> {
     await this.transport.request(
       this.fsPath(sandbox, "set-permissions"),
-      { method: "POST", body: jsonBody(compact({ path, mode: params.mode, owner: params.owner, group: params.group })) },
+      {
+        method: "POST",
+        body: jsonBody(
+          compact({ path, mode: params.mode, owner: params.owner, group: params.group }),
+        ),
+      },
       options,
     );
   }
@@ -267,7 +274,12 @@ export class FilesystemClient {
   ): Promise<SearchMatch[]> {
     const data = await this.transport.requestJson<SearchMatch[]>(
       this.fsPath(sandbox, "grep"),
-      { method: "POST", body: jsonBody(compact({ path, pattern, include: params.include, exclude: params.exclude })) },
+      {
+        method: "POST",
+        body: jsonBody(
+          compact({ path, pattern, include: params.include, exclude: params.exclude }),
+        ),
+      },
       options,
     );
     return normalize(z.object({ items: z.array(searchMatchSchema) }), data).items;
@@ -294,15 +306,16 @@ export class FilesystemClient {
     params: { paths: string[]; find: string; replace?: string },
     options: RequestOptions = {},
   ): Promise<EditFilesResult> {
+    const payload = {
+      files: params.paths,
+      find: params.find,
+      ...(params.replace == null ? {} : { replace: params.replace }),
+    };
     const data = await this.transport.requestJson<EditFilesResult>(
       this.fsPath(sandbox, "edit-files"),
       {
         method: "POST",
-        body: jsonBody({
-          files: params.paths,
-          find: params.find,
-          replace: params.replace ?? "",
-        }),
+        body: jsonBody(payload),
       },
       options,
     );
@@ -334,17 +347,23 @@ export class FilesystemClient {
   ): Promise<void> {
     await this.transport.request(
       this.fsPath(sandbox, "copy"),
-      { method: "POST", body: jsonBody(compact({ src_path: srcPath, dst_path: dstPath, recursive: params.recursive, overwrite: params.overwrite })) },
+      {
+        method: "POST",
+        body: jsonBody(
+          compact({
+            src_path: srcPath,
+            dst_path: dstPath,
+            recursive: params.recursive,
+            overwrite: params.overwrite,
+          }),
+        ),
+      },
       options,
     );
   }
 
   /** Checks whether a path exists in the sandbox. */
-  async exists(
-    sandbox: SandboxRef,
-    path: string,
-    options: RequestOptions = {},
-  ): Promise<boolean> {
+  async exists(sandbox: SandboxRef, path: string, options: RequestOptions = {}): Promise<boolean> {
     const data = await this.transport.requestJson(
       this.fsPath(sandbox, "exists"),
       { method: "POST", body: jsonBody({ path }) },
@@ -362,7 +381,10 @@ export class FilesystemClient {
   ): Promise<TreeResult> {
     const data = await this.transport.requestJson<TreeResult>(
       this.fsPath(sandbox, "tree"),
-      { method: "POST", body: jsonBody(compact({ path, max_depth: params.maxDepth, exclude: params.exclude })) },
+      {
+        method: "POST",
+        body: jsonBody(compact({ path, max_depth: params.maxDepth, exclude: params.exclude })),
+      },
       options,
     );
     return normalize(treeResultSchema, data);

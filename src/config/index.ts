@@ -22,6 +22,16 @@ function requireNonEmpty(value: string | undefined, label: string): string {
   return value.trim();
 }
 
+function resolveSdkOtelFromEnv(envOtel: string | undefined): boolean {
+  if (envOtel === "true") {
+    return true;
+  }
+  if (envOtel === "false") {
+    return false;
+  }
+  return Boolean(readEnv("OTEL_EXPORTER_OTLP_ENDPOINT"));
+}
+
 /**
  * Resolves SDK configuration from explicit input and environment variables.
  *
@@ -45,13 +55,7 @@ export function resolveConfig(input: Leap0ConfigInput = {}): Leap0ConfigResolved
   const authHeader = (input.authHeader ?? "authorization").trim();
   const bearer = input.bearer ?? true;
   const envOtel = readEnv("LEAP0_SDK_OTEL_ENABLED");
-  const sdkOtelEnabled =
-    input.sdkOtelEnabled ??
-    (envOtel === "true"
-      ? true
-      : envOtel === "false"
-        ? false
-        : Boolean(readEnv("OTEL_EXPORTER_OTLP_ENDPOINT")));
+  const sdkOtelEnabled = input.sdkOtelEnabled ?? resolveSdkOtelFromEnv(envOtel);
 
   if (!Number.isFinite(timeout) || timeout <= 0) {
     throw new Leap0Error("timeout must be a positive number");

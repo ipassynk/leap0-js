@@ -313,7 +313,10 @@ export class DesktopClient {
       { ...options, expectedStatus: [200, 503] },
     );
   }
-  async processStatus(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopProcessStatusList> {
+  async processStatus(
+    sandbox: SandboxRef,
+    options?: RequestOptions,
+  ): Promise<DesktopProcessStatusList> {
     return this.requestJson(
       sandbox,
       desktopProcessStatusListSchema,
@@ -409,8 +412,17 @@ export class DesktopClient {
           if (status.status === "running") {
             return;
           }
+          if (
+            typeof status.running === "number" &&
+            typeof status.total === "number" &&
+            status.running >= status.total
+          ) {
+            return;
+          }
         }
-        // Stream ended without reaching running, retry
+        const retryDelay = deadline - Date.now();
+        if (retryDelay <= 0) break;
+        await new Promise((resolve) => setTimeout(resolve, Math.min(500, retryDelay)));
       } catch (error) {
         lastError = error;
         if (error instanceof Leap0Error && !error.retryable) throw error;

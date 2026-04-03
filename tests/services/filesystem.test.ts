@@ -41,10 +41,12 @@ test("filesystem client sends expected request shapes", async () => {
   await client.readBytes("sb-1", "/tmp/b.bin");
   await client.delete("sb-1", "/tmp/a.txt");
   await client.setPermissions("sb-1", "/tmp/a.txt", { mode: "0755" });
+  await client.setPermissions("sb-1", "/tmp/b.txt", { owner: "alice", group: "staff" });
   await client.glob("sb-1", "/workspace", "**/*.ts");
   await client.grep("sb-1", "/workspace", "todo");
   await client.editFile("sb-1", "/tmp/a.txt", [{ find: "a", replace: "b" }]);
   await client.editFiles("sb-1", { paths: ["/tmp/a.txt"], find: "a", replace: "b" });
+  await client.editFiles("sb-1", { paths: ["/tmp/b.txt"], find: "x" });
   await client.move("sb-1", "/tmp/a", "/tmp/b");
   await client.copy("sb-1", "/tmp/b", "/tmp/c");
   const fileExists = await client.exists("sb-1", "/tmp/c");
@@ -57,17 +59,24 @@ test("filesystem client sends expected request shapes", async () => {
   assert.equal(calls[3]?.options.query?.path, "/tmp/a.txt");
   assert.equal(new Headers(calls[4]!.init.headers).get("content-type"), "application/octet-stream");
   assert.deepEqual(jsonOf(calls[5]!), { path: "/tmp/a.txt", head: 10 });
-  assert.deepEqual(jsonOf(calls[11]!), {
+  assert.deepEqual(jsonOf(calls[8]!), { path: "/tmp/a.txt", mode: "0755" });
+  assert.deepEqual(jsonOf(calls[9]!), { path: "/tmp/b.txt", owner: "alice", group: "staff" });
+  assert.deepEqual(jsonOf(calls[12]!), {
     path: "/tmp/a.txt",
     edits: [{ find: "a", replace: "b" }],
   });
-  assert.deepEqual(jsonOf(calls[12]!), {
+  assert.deepEqual(jsonOf(calls[13]!), {
     files: ["/tmp/a.txt"],
     find: "a",
     replace: "b",
   });
-  assert.deepEqual(jsonOf(calls[13]!), { src_path: "/tmp/a", dst_path: "/tmp/b", overwrite: false });
+  assert.deepEqual(jsonOf(calls[14]!), { files: ["/tmp/b.txt"], find: "x" });
+  assert.deepEqual(jsonOf(calls[15]!), {
+    src_path: "/tmp/a",
+    dst_path: "/tmp/b",
+    overwrite: false,
+  });
   assert.equal(typeof fileExists, "boolean");
   assert.equal(fileExists, true);
-  assert.deepEqual(jsonOf(calls[16]!), { path: "/workspace", max_depth: 2 });
+  assert.deepEqual(jsonOf(calls[18]!), { path: "/workspace", max_depth: 2 });
 });

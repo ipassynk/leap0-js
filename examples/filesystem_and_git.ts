@@ -8,7 +8,10 @@ async function main(): Promise<void> {
     const sandbox = await client.sandboxes.create();
 
     try {
-      const clone = await sandbox.git.clone({ url: "https://github.com/octocat/Hello-World.git", path: repoPath });
+      const clone = await sandbox.git.clone({
+        url: "https://github.com/octocat/Hello-World.git",
+        path: repoPath,
+      });
       console.log("clone exit:", clone.exitCode);
 
       const status = await sandbox.git.status(repoPath);

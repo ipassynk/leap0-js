@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "vitest";
+import { afterEach, beforeEach, test } from "vitest";
 
 import { Leap0Error } from "@/core/errors.js";
 import { SandboxesClient } from "@/services/sandboxes.js";
@@ -24,6 +24,24 @@ function makeClient() {
   const client = new SandboxesClient(transport as never);
   return { client, calls };
 }
+
+const ENV_KEYS = ["OTEL_EXPORTER_OTLP_ENDPOINT", "OTEL_EXPORTER_OTLP_HEADERS"] as const;
+let envSnapshot: Partial<Record<(typeof ENV_KEYS)[number], string | undefined>> = {};
+
+beforeEach(() => {
+  envSnapshot = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
+});
+
+afterEach(() => {
+  for (const key of ENV_KEYS) {
+    const value = envSnapshot[key];
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+});
 
 test("sandboxes create validates payload and wraps result", async () => {
   const { client, calls } = makeClient();

@@ -32,11 +32,20 @@ export class CodeInterpreterClient {
     init: RequestInit = {},
     options: RequestOptions = {},
   ): Promise<T> {
-    return (await this.transport.requestJsonUrl<T>(this.requestPath(sandbox, path), init, options))!;
+    return (await this.transport.requestJsonUrl<T>(
+      this.requestPath(sandbox, path),
+      init,
+      options,
+    ))!;
   }
 
   async health(sandbox: SandboxRef, options: RequestOptions = {}): Promise<boolean> {
-    const data = await this.fetchJson<Record<string, unknown>>(sandbox, "/healthz", { method: "GET" }, options);
+    const data = await this.fetchJson<Record<string, unknown>>(
+      sandbox,
+      "/healthz",
+      { method: "GET" },
+      options,
+    );
     return data?.status === "ok";
   }
   async createContext(

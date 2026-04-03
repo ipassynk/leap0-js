@@ -58,10 +58,19 @@ export function initOtel(_config: Leap0ConfigResolved): void {
  *   A promise that resolves once providers are flushed and shut down.
  */
 export async function shutdownOtel(): Promise<void> {
-  await tracerProviderInstance?.shutdown();
-  await meterProviderInstance?.shutdown();
+  const tracerProvider = tracerProviderInstance;
+  const meterProvider = meterProviderInstance;
   tracerProviderInstance = undefined;
   meterProviderInstance = undefined;
+
+  await Promise.all([
+    tracerProvider?.shutdown().catch((error) => {
+      console.warn("Failed to shutdown OpenTelemetry tracer provider", error);
+    }),
+    meterProvider?.shutdown().catch((error) => {
+      console.warn("Failed to shutdown OpenTelemetry meter provider", error);
+    }),
+  ]);
 }
 
 /**

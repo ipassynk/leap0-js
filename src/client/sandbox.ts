@@ -15,6 +15,41 @@ import type { Leap0Client } from "@/client/index.js";
 /** @internal Symbol used to access service clients on Leap0Client. */
 export const SERVICES = Symbol.for("leap0.services");
 
+function isSandboxData(value: unknown): value is SandboxData {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.id === "string" &&
+    typeof record.templateId === "string" &&
+    typeof record.state === "string" &&
+    typeof record.vcpu === "number" &&
+    typeof record.memoryMib === "number" &&
+    typeof record.diskMib === "number" &&
+    typeof record.createdAt === "string"
+  );
+}
+
+function unwrapSandboxData(value: unknown): SandboxData {
+  if (value instanceof Sandbox || isSandboxData(value)) {
+    return value;
+  }
+  if (value && typeof value === "object") {
+    const record = value as { data?: unknown; toJSON?: () => unknown };
+    if (isSandboxData(record.data)) {
+      return record.data;
+    }
+    if (typeof record.toJSON === "function") {
+      const json = record.toJSON();
+      if (isSandboxData(json)) {
+        return json;
+      }
+    }
+  }
+  throw new TypeError("Expected this.client.sandboxes.get() to return SandboxData or Sandbox");
+}
+
 type BoundSandboxMethod<Method> = Method extends (
   sandbox: infer _Sandbox,
   ...args: infer Args
@@ -115,7 +150,8 @@ export class Sandbox implements SandboxData {
    *   The refreshed sandbox handle.
    */
   async refresh(): Promise<this> {
-    this.update(await this.client.sandboxes.get(this.id) as SandboxData);
+    const latest = await this.client.sandboxes.get(this.id);
+    this.update(unwrapSandboxData(latest));
     return this;
   }
 
@@ -129,7 +165,7 @@ export class Sandbox implements SandboxData {
    *   The paused sandbox handle.
    */
   async pause(options?: { timeout?: number }): Promise<this> {
-    this.update(await this.client.sandboxes.pause(this.id, options) as SandboxData);
+    this.update((await this.client.sandboxes.pause(this.id, options)) as SandboxData);
     return this;
   }
 

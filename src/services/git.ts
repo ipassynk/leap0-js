@@ -101,7 +101,12 @@ export class GitClient {
   ): Promise<GitResult> {
     return normalize(
       gitResultSchema,
-      await this.json(sandbox, "diff-unstaged", compact({ path, context_lines: contextLines }), options),
+      await this.json(
+        sandbox,
+        "diff-unstaged",
+        compact({ path, context_lines: contextLines }),
+        options,
+      ),
     );
   }
 
@@ -113,7 +118,12 @@ export class GitClient {
   ): Promise<GitResult> {
     return normalize(
       gitResultSchema,
-      await this.json(sandbox, "diff-staged", compact({ path, context_lines: contextLines }), options),
+      await this.json(
+        sandbox,
+        "diff-staged",
+        compact({ path, context_lines: contextLines }),
+        options,
+      ),
     );
   }
 
@@ -126,7 +136,12 @@ export class GitClient {
   ): Promise<GitResult> {
     return normalize(
       gitResultSchema,
-      await this.json(sandbox, "diff", compact({ path, target, context_lines: contextLines }), options),
+      await this.json(
+        sandbox,
+        "diff",
+        compact({ path, target, context_lines: contextLines }),
+        options,
+      ),
     );
   }
 

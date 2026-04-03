@@ -6,6 +6,7 @@ import { SERVICES } from "@/client/sandbox.js";
 import type { RequestOptions } from "@/models/index.js";
 
 test("Leap0Client wires services and supports direct access", async () => {
+  const originalApiKey = process.env.LEAP0_API_KEY;
   process.env.LEAP0_API_KEY = "env-key";
   const client = new Leap0Client({ apiKey: "explicit-key", sandboxDomain: "sandbox.example.com" });
   const originalGet = client.sandboxes.get;
@@ -37,22 +38,43 @@ test("Leap0Client wires services and supports direct access", async () => {
     client.sandboxes.get = originalGet;
     client.sandboxes.create = originalCreate;
     await client.close();
+    if (originalApiKey === undefined) {
+      delete process.env.LEAP0_API_KEY;
+    } else {
+      process.env.LEAP0_API_KEY = originalApiKey;
+    }
   }
 });
 
 test("Sandbox binds service methods to itself", async () => {
+  let wrapped = false;
   const fakeClient = {
     sandboxes: {
-      get: async () => ({
-        id: "sb-1",
-        templateId: "tpl-1",
-        state: "running",
-        vcpu: 2,
-        memoryMib: 2048,
-        diskMib: 4096,
-        autoPause: false,
-        createdAt: "2026-01-01T00:00:00Z",
-      }),
+      get: async () => {
+        if (!wrapped) {
+          wrapped = true;
+          return new Sandbox(fakeClient as never, {
+            id: "sb-1",
+            templateId: "tpl-1",
+            state: "running",
+            vcpu: 2,
+            memoryMib: 2048,
+            diskMib: 4096,
+            autoPause: false,
+            createdAt: "2026-01-01T00:00:00Z",
+          });
+        }
+        return {
+          id: "sb-1",
+          templateId: "tpl-1",
+          state: "running",
+          vcpu: 2,
+          memoryMib: 2048,
+          diskMib: 4096,
+          autoPause: false,
+          createdAt: "2026-01-01T00:00:00Z",
+        };
+      },
       pause: async () => ({
         id: "sb-1",
         templateId: "tpl-1",

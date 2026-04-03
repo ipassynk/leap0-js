@@ -25,6 +25,7 @@ test("ssh client sends expected request shapes", async () => {
   await client.validateAccess("sb-1", "ssh-1", "secret");
   await client.regenerateAccess("sb-1");
   await client.deleteAccess("sb-1");
+  assert.equal(calls.length, 4);
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/ssh/access");
   assert.deepEqual(jsonOf(calls[1]!), { id: "ssh-1", password: "secret" });
   assert.equal(calls[2]?.path, "/v1/sandbox/sb-1/ssh/regen");

@@ -5,26 +5,34 @@ import { CodeInterpreterClient } from "@/services/code-interpreter.js";
 import { FilesystemClient } from "@/services/filesystem.js";
 import { SshClient } from "@/services/ssh.js";
 import { TemplatesClient } from "@/services/templates.js";
-import { createRecordedTransport } from "@tests/utils/helpers.ts";
+import { createRecordedTransport, jsonOf } from "@tests/utils/helpers.ts";
 
 test("template client normalizes created_at", async () => {
-  const { transport } = createRecordedTransport({
-    requestJson: async () => ({
-      id: "tpl-1",
-      name: "custom",
-      digest: "sha256:abc",
-      image_config: { entrypoint: ["python"], cmd: ["app.py"] },
-      is_system: false,
-      created_at: "2026-01-01T00:00:00Z",
-    }),
+  const { transport, calls } = createRecordedTransport({
+    requestJson: async (path: string, init: RequestInit, options: never) => {
+      calls.push({ path, init, options });
+      return {
+        id: "tpl-1",
+        name: "custom",
+        digest: "sha256:abc",
+        image_config: { entrypoint: ["python"], cmd: ["app.py"] },
+        is_system: false,
+        created_at: "2026-01-01T00:00:00Z",
+      };
+    },
   });
 
   const template = await new TemplatesClient(transport as never).create({
     name: "custom",
     uri: "docker.io/acme/app:latest",
-  });
+    ignored: true,
+  } as never);
 
   assert.equal(template.createdAt, "2026-01-01T00:00:00Z");
+  assert.deepEqual(jsonOf(calls[0]!), {
+    name: "custom",
+    uri: "docker.io/acme/app:latest",
+  });
 });
 
 test("ssh client normalizes expires_at", async () => {
@@ -75,9 +83,10 @@ test("code interpreter client normalizes context fields", async () => {
     requestJsonUrl: async () => ({ id: "ctx-1", language: 1, cwd: "/workspace" }),
   });
 
-  const context = await new CodeInterpreterClient(
-    transport as never,
-  ).createContext("sb-1", "python");
+  const context = await new CodeInterpreterClient(transport as never).createContext(
+    "sb-1",
+    "python",
+  );
 
   assert.equal(context.cwd, "/workspace");
 });

@@ -13,7 +13,7 @@ const strictFiles = new Set([
 ]);
 
 function rel(fileName: string): string {
-  return path.relative(rootDir, fileName);
+  return path.relative(rootDir, fileName).split(path.sep).join(path.posix.sep);
 }
 
 function jsDocText(node: ts.Node, sourceFile: ts.SourceFile): string {

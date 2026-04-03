@@ -17,11 +17,16 @@ export class LspClient {
     body: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
-    return (await this.transport.requestJson<T>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/lsp/${endpoint}`,
+    const path = `/v1/sandbox/${sandboxIdOf(sandbox)}/lsp/${endpoint}`;
+    const result = await this.transport.requestJson<T>(
+      path,
       { method: "POST", body: jsonBody(body) },
       options,
-    ))!;
+    );
+    if (result == null) {
+      throw new Error(`Empty response from ${path}`);
+    }
+    return result;
   }
 
   async start(
@@ -92,7 +97,10 @@ export class LspClient {
   ): Promise<void> {
     await this.transport.request(
       `/v1/sandbox/${sandboxIdOf(sandbox)}/lsp/did-close`,
-      { method: "POST", body: jsonBody({ language_id: languageId, path_to_project: pathToProject, uri }) },
+      {
+        method: "POST",
+        body: jsonBody({ language_id: languageId, path_to_project: pathToProject, uri }),
+      },
       options,
     );
   }

@@ -143,7 +143,9 @@ export class PtyClient {
 
   connect(sandbox: SandboxRef, sessionId: string): PtyConnection {
     return new PtyConnection(
-      new WebSocket(this.websocketUrl(sandbox, sessionId), { headers: this.websocketHeaders() } as never),
+      new WebSocket(this.websocketUrl(sandbox, sessionId), {
+        headers: this.websocketHeaders(),
+      } as never),
     );
   }
 }

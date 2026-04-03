@@ -13,6 +13,7 @@ test("process client sends execute request shape", async () => {
   });
   const client = new ProcessClient(transport as never);
   await client.execute("sb-1", { command: "npm test", cwd: "/workspace", timeout: 30 });
+  assert.equal(calls.length, 1);
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/process/execute");
   assert.deepEqual(jsonOf(calls[0]!), { command: "npm test", cwd: "/workspace", timeout: 30 });
 });

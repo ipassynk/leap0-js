@@ -17,25 +17,25 @@ export class TemplatesClient {
 
   /** Uploads a new template from a container image URI. */
   async create(params: CreateTemplateParams, options: RequestOptions = {}): Promise<TemplateData> {
-    createTemplateParamsSchema.parse(params);
+    const parsed = createTemplateParamsSchema.parse(params);
 
     if (
-      !params.name.trim() ||
-      params.name.length > 64 ||
-      /\s/.test(params.name) ||
-      params.name.startsWith("system/")
+      !parsed.name.trim() ||
+      parsed.name.length > 64 ||
+      /\s/.test(parsed.name) ||
+      parsed.name.startsWith("system/")
     ) {
       throw new Leap0Error(
         "name must be non-empty, <= 64 chars, contain no whitespace, and not start with system/",
       );
     }
-    if (!params.uri.trim() || params.uri.length > 500) {
+    if (!parsed.uri.trim() || parsed.uri.length > 500) {
       throw new Leap0Error("uri must be non-empty and <= 500 chars");
     }
     return withErrorPrefix("Failed to create template: ", async () => {
       const data = await this.transport.requestJson<TemplateData>(
         "/v1/template",
-        { method: "POST", body: jsonBody(params) },
+        { method: "POST", body: jsonBody(parsed) },
         options,
       );
       return normalize(templateDataSchema, data);

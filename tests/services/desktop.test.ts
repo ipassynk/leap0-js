@@ -81,3 +81,14 @@ test("desktop statusStream parses SSE and raises API errors", async () => {
   assert.equal(calls[0]?.url, "https://sb-1.sandbox.example.com/api/status/stream");
   // health endpoint tested separately, it accepts 503 gracefully
 });
+
+test("desktop waitUntilReady treats count-only updates as ready", async () => {
+  const { transport } = createRecordedTransport({
+    streamJsonUrl: async function* () {
+      yield { items: [{ name: "x11vnc", running: true }], running: 1, total: 1 };
+    },
+  });
+  const client = new DesktopClient(transport as never);
+
+  await client.waitUntilReady("sb-1", 1);
+});

@@ -8,8 +8,7 @@ test("git client sends expected request shapes", async () => {
   const { transport, calls } = createRecordedTransport({
     requestJson: async (path: string, init: RequestInit, options: never) => {
       calls.push({ path, init, options });
-      if (path.endsWith("/commit"))
-        return { result: { output: "ok", exit_code: 0 } };
+      if (path.endsWith("/commit")) return { result: { output: "ok", exit_code: 0 } };
       return { output: "ok", exit_code: 0 };
     },
   });
@@ -27,19 +26,33 @@ test("git client sends expected request shapes", async () => {
   await client.checkoutBranch("sb-1", { path: "/workspace/repo", branch: "feat" });
   await client.deleteBranch("sb-1", "/workspace/repo", "feat");
   await client.add("sb-1", "/workspace/repo", ["a.ts"]);
-  await client.commit("sb-1", { path: "/workspace/repo", message: "msg", author: "Test User", email: "test@example.com" });
+  await client.commit("sb-1", {
+    path: "/workspace/repo",
+    message: "msg",
+    author: "Test User",
+    email: "test@example.com",
+  });
   await client.push("sb-1", { path: "/workspace/repo" });
   await client.pull("sb-1", { path: "/workspace/repo" });
+
+  const diffCall = calls.find((call) => call.path === "/v1/sandbox/sb-1/git/diff");
+  const showCall = calls.find((call) => call.path === "/v1/sandbox/sb-1/git/show");
+  const addCall = calls.find((call) => call.path === "/v1/sandbox/sb-1/git/add");
+  const commitCall = calls.find((call) => call.path === "/v1/sandbox/sb-1/git/commit");
 
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/git/clone");
   assert.deepEqual(jsonOf(calls[0]!), {
     url: "https://example.com/repo.git",
     path: "/workspace/repo",
   });
-  assert.deepEqual(jsonOf(calls[5]!), { path: "/workspace/repo", target: "main" });
-  assert.deepEqual(jsonOf(calls[8]!), { path: "/workspace/repo", revision: "HEAD" });
-  assert.deepEqual(jsonOf(calls[12]!), { path: "/workspace/repo", files: ["a.ts"] });
-  assert.deepEqual(jsonOf(calls[13]!), {
+  assert.equal(diffCall?.path, "/v1/sandbox/sb-1/git/diff");
+  assert.deepEqual(jsonOf(diffCall!), { path: "/workspace/repo", target: "main" });
+  assert.equal(showCall?.path, "/v1/sandbox/sb-1/git/show");
+  assert.deepEqual(jsonOf(showCall!), { path: "/workspace/repo", revision: "HEAD" });
+  assert.equal(addCall?.path, "/v1/sandbox/sb-1/git/add");
+  assert.deepEqual(jsonOf(addCall!), { path: "/workspace/repo", files: ["a.ts"] });
+  assert.equal(commitCall?.path, "/v1/sandbox/sb-1/git/commit");
+  assert.deepEqual(jsonOf(commitCall!), {
     path: "/workspace/repo",
     message: "msg",
     author: "Test User",

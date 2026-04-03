@@ -9,7 +9,14 @@ test("lsp client sends expected request shapes", async () => {
   const client = new LspClient(transport as never);
   await client.start("sb-1", "typescript", "/workspace");
   await client.stop("sb-1", "typescript", "/workspace");
-  await client.didOpenPath("sb-1", "typescript", "/workspace", "/workspace/a.ts", "const x = 1;", 1);
+  await client.didOpenPath(
+    "sb-1",
+    "typescript",
+    "/workspace",
+    "/workspace/a.ts",
+    "const x = 1;",
+    1,
+  );
   await client.didClosePath("sb-1", "typescript", "/workspace", "/workspace/a.ts");
   await client.completionsPath("sb-1", "typescript", "/workspace", "/workspace/a.ts", 1, 2);
   await client.documentSymbolsPath("sb-1", "typescript", "/workspace", "/workspace/a.ts");
@@ -28,4 +35,16 @@ test("lsp client sends expected request shapes", async () => {
     uri: "file:///workspace/a.ts",
     position: { line: 1, character: 2 },
   });
+});
+
+test("lsp client throws a clear error for empty json responses", async () => {
+  const { transport } = createRecordedTransport({
+    requestJson: async () => undefined,
+  });
+  const client = new LspClient(transport as never);
+
+  await assert.rejects(
+    () => client.start("sb-1", "typescript", "/workspace"),
+    /Empty response from \/v1\/sandbox\/sb-1\/lsp\/start/,
+  );
 });

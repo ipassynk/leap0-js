@@ -73,10 +73,7 @@ export class SandboxesClient<T = SandboxData> {
   }
 
   /** Creates a sandbox from a template and resource config. */
-  async create(
-    params: CreateSandboxParams = {},
-    options: RequestOptions = {},
-  ): Promise<T> {
+  async create(params: CreateSandboxParams = {}, options: RequestOptions = {}): Promise<T> {
     const templateName = (params.templateName ?? DEFAULT_TEMPLATE_NAME).trim();
     const vcpu = params.vcpu ?? DEFAULT_VCPU;
     const memoryMib = params.memoryMib ?? DEFAULT_MEMORY_MIB;
