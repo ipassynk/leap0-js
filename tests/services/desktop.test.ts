@@ -33,13 +33,34 @@ test("desktop client sends expected request shapes", async () => {
       if (path === "/api/status")
         return Promise.resolve({
           status: "running",
-          items: [{ name: "x11vnc", running: true }],
+          items: [
+            {
+              name: "x11vnc",
+              running: true,
+              stdout_log: "/tmp/x11vnc.stdout.log",
+              stderr_log: "/tmp/x11vnc.stderr.log",
+            },
+          ],
           running: 1,
           total: 1,
         });
-      if (path.endsWith("/status")) return Promise.resolve({ name: "x11vnc", running: true });
+      if (path.endsWith("/status"))
+        return Promise.resolve({
+          name: "x11vnc",
+          running: true,
+          stdout_log: "/tmp/x11vnc.stdout.log",
+          stderr_log: "/tmp/x11vnc.stderr.log",
+        });
       if (path.endsWith("/restart"))
-        return Promise.resolve({ message: "restarted", status: { name: "x11vnc", running: true } });
+        return Promise.resolve({
+          message: "restarted",
+          status: {
+            name: "x11vnc",
+            running: true,
+            stdout_log: "/tmp/x11vnc.stdout.log",
+            stderr_log: "/tmp/x11vnc.stderr.log",
+          },
+        });
       if (path.endsWith("/logs")) return Promise.resolve({ process: "x11vnc", logs: "ok" });
       if (path.endsWith("/errors")) return Promise.resolve({ process: "x11vnc", errors: "" });
       return Promise.resolve({ ok: true });
@@ -68,7 +89,19 @@ test("desktop statusStream parses SSE and raises API errors", async () => {
   const { transport, calls } = createRecordedTransport({
     streamJsonUrl: async function* (url: string) {
       calls.push({ path: new URL(url).pathname, url, init: { method: "GET" }, options: {} });
-      yield { status: "running", items: [{ name: "x11vnc", running: true }], running: 1, total: 1 };
+      yield {
+        status: "running",
+        items: [
+          {
+            name: "x11vnc",
+            running: true,
+            stdout_log: "/tmp/x11vnc.stdout.log",
+            stderr_log: "/tmp/x11vnc.stderr.log",
+          },
+        ],
+        running: 1,
+        total: 1,
+      };
     },
     requestJsonUrl: () => Promise.reject(new Leap0Error("Desktop request failed")),
   });
@@ -76,7 +109,19 @@ test("desktop statusStream parses SSE and raises API errors", async () => {
   const events: unknown[] = [];
   for await (const event of client.statusStream("sb-1")) events.push(event);
   assert.deepEqual(events, [
-    { status: "running", items: [{ name: "x11vnc", running: true }], running: 1, total: 1 },
+    {
+      status: "running",
+      items: [
+        {
+          name: "x11vnc",
+          running: true,
+          stdoutLog: "/tmp/x11vnc.stdout.log",
+          stderrLog: "/tmp/x11vnc.stderr.log",
+        },
+      ],
+      running: 1,
+      total: 1,
+    },
   ]);
   assert.equal(calls[0]?.url, "https://sb-1.sandbox.example.com/api/status/stream");
   // health endpoint tested separately, it accepts 503 gracefully
@@ -108,7 +153,19 @@ test("desktop statusStream throws Leap0Error for SSE error frames", async () => 
 test("desktop waitUntilReady treats count-only updates as ready", async () => {
   const { transport } = createRecordedTransport({
     streamJsonUrl: async function* () {
-      yield { items: [{ name: "x11vnc", running: true }], running: 1, total: 1 };
+      yield {
+        status: "degraded",
+        items: [
+          {
+            name: "x11vnc",
+            running: true,
+            stdout_log: "/tmp/x11vnc.stdout.log",
+            stderr_log: "/tmp/x11vnc.stderr.log",
+          },
+        ],
+        running: 1,
+        total: 1,
+      };
     },
   });
   const client = new DesktopClient(transport as never);
@@ -130,8 +187,20 @@ test("desktop input methods require a real boolean ok response", async () => {
 test("desktop waitUntilReady ignores zero total count updates", async () => {
   const { transport } = createRecordedTransport({
     streamJsonUrl: async function* () {
-      yield { items: [], running: 0, total: 0 };
-      yield { items: [{ name: "x11vnc", running: true }], running: 1, total: 1 };
+      yield { status: "stopped", items: [], running: 0, total: 0 };
+      yield {
+        status: "degraded",
+        items: [
+          {
+            name: "x11vnc",
+            running: true,
+            stdout_log: "/tmp/x11vnc.stdout.log",
+            stderr_log: "/tmp/x11vnc.stderr.log",
+          },
+        ],
+        running: 1,
+        total: 1,
+      };
     },
   });
   const client = new DesktopClient(transport as never);
@@ -148,4 +217,15 @@ test("desktop client validates request payloads before transport", async () => {
   await assert.rejects(() => client.screenshotRegion("sb-1", { x: 0, y: 0, width: 0, height: 10 }));
   await assert.rejects(() => client.click("sb-1", { x: 10 }));
   assert.equal(calls.length, 0);
+});
+
+test("desktop screenshot accepts zero-sized paired region query", async () => {
+  const { transport, calls } = createRecordedTransport();
+  const client = new DesktopClient(transport as never);
+
+  await client.screenshot("sb-1", { width: 0, height: 0 });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.url, "https://sb-1.sandbox.example.com/api/screenshot");
+  assert.deepEqual(calls[0]?.options.query, { width: 0, height: 0 });
 });

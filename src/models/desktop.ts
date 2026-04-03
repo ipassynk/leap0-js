@@ -29,8 +29,8 @@ export const desktopScreenshotParamsSchema = z
     quality: z.number().int().min(1).max(100).optional(),
     x: z.number().int().min(0).optional(),
     y: z.number().int().min(0).optional(),
-    width: z.number().int().min(1).optional(),
-    height: z.number().int().min(1).optional(),
+    width: z.number().int().min(0).optional(),
+    height: z.number().int().min(0).optional(),
   })
   .refine((params) => (params.width === undefined) === (params.height === undefined), {
     message: "width and height must be provided together",
@@ -130,20 +130,20 @@ export type DesktopRecordingStatus = z.infer<typeof desktopRecordingStatusSchema
 
 export const desktopProcessStatusSchema = z
   .object({
-    name: z.string().optional(),
-    running: z.boolean().optional(),
-    pid: z.number().optional(),
-    stdoutLog: z.string().optional(),
-    stderrLog: z.string().optional(),
+    name: z.string(),
+    running: z.boolean(),
+    pid: z.number().int().optional(),
+    stdoutLog: z.string(),
+    stderrLog: z.string(),
   });
 export type DesktopProcessStatus = z.infer<typeof desktopProcessStatusSchema>;
 
 export const desktopProcessStatusListSchema = z
   .object({
-    status: z.enum(["running", "degraded", "stopped"]).optional(),
-    items: z.array(desktopProcessStatusSchema).optional(),
-    running: z.number().int().optional(),
-    total: z.number().int().optional(),
+    status: z.enum(["running", "degraded", "stopped"]),
+    items: z.array(desktopProcessStatusSchema),
+    running: z.number().int(),
+    total: z.number().int(),
   });
 export type DesktopProcessStatusList = z.infer<typeof desktopProcessStatusListSchema>;
 
