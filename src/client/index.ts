@@ -77,14 +77,22 @@ export class Leap0Client {
     if (this.closed) {
       return;
     }
-    this.closed = true;
-    await this.transport.close();
+    let transportError: unknown;
+    try {
+      await this.transport.close();
+    } catch (error) {
+      transportError = error;
+    }
     if (this.sdkOtelEnabled) {
       try {
         await shutdownOtel();
       } catch (error) {
         console.warn("Failed to shutdown OpenTelemetry providers", error);
       }
+    }
+    this.closed = true;
+    if (transportError !== undefined) {
+      throw transportError;
     }
   }
 }

@@ -1,7 +1,4 @@
-import {
-  OTEL_EXPORTER_OTLP_ENDPOINT,
-  OTEL_EXPORTER_OTLP_HEADERS,
-} from "@/config/constants.js";
+import { OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_HEADERS } from "@/config/constants.js";
 import { Leap0Error } from "@/core/errors.js";
 import { normalize } from "@/core/normalize.js";
 import {

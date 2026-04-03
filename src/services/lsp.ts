@@ -78,11 +78,11 @@ export class LspClient {
     versionOrOptions?: number | RequestOptions,
     options?: RequestOptions,
   ): Promise<void> {
-    const { text, version, options: normalizedOptions } = this.normalizeDidOpenArgs(
-      textOrOptions,
-      versionOrOptions,
-      options,
-    );
+    const {
+      text,
+      version,
+      options: normalizedOptions,
+    } = this.normalizeDidOpenArgs(textOrOptions, versionOrOptions, options);
     const payload: Record<string, unknown> = {
       language_id: languageId,
       path_to_project: pathToProject,

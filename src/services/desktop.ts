@@ -28,6 +28,7 @@ import { sandboxBaseUrl, sandboxIdOf } from "@/core/utils.js";
 import {
   desktopClickParamsSchema,
   desktopDisplayInfoSchema,
+  desktopDragParamsSchema,
   desktopHealthSchema,
   desktopPointerPositionSchema,
   desktopProcessErrorsSchema,
@@ -39,6 +40,7 @@ import {
   desktopRecordingSummarySchema,
   desktopScreenshotParamsSchema,
   desktopScreenshotRegionParamsSchema,
+  desktopScrollParamsSchema,
   desktopSetScreenParamsSchema,
   desktopWindowSchema,
 } from "@/models/desktop.js";
@@ -181,6 +183,7 @@ export class DesktopClient {
     payload: DesktopDragParams,
     options?: RequestOptions,
   ): Promise<DesktopPointerPosition> {
+    const parsed = desktopDragParamsSchema.parse(payload);
     return this.requestJson(
       sandbox,
       desktopPointerPositionSchema,
@@ -188,11 +191,11 @@ export class DesktopClient {
       {
         method: "POST",
         body: jsonBody({
-          from_x: payload.fromX,
-          from_y: payload.fromY,
-          to_x: payload.toX,
-          to_y: payload.toY,
-          button: payload.button,
+          from_x: parsed.fromX,
+          from_y: parsed.fromY,
+          to_x: parsed.toX,
+          to_y: parsed.toY,
+          button: parsed.button,
         }),
       },
       options,
@@ -203,11 +206,12 @@ export class DesktopClient {
     payload: DesktopScrollParams,
     options?: RequestOptions,
   ): Promise<DesktopPointerPosition> {
+    const parsed = desktopScrollParamsSchema.parse(payload);
     return this.requestJson(
       sandbox,
       desktopPointerPositionSchema,
       "/api/input/scroll",
-      { method: "POST", body: jsonBody(payload) },
+      { method: "POST", body: jsonBody(parsed) },
       options,
     );
   }
@@ -402,10 +406,10 @@ export class DesktopClient {
       }
       const record = asRecord(event);
       if (record.error !== undefined) {
-        throw new Leap0Error("Desktop status stream error", { body: String(record.error) });
+        throw new Leap0Error("Desktop status stream error", { body: record.error });
       }
       if (typeof record.message === "string") {
-        throw new Leap0Error(String(record.message));
+        throw new Leap0Error(String(record.message), { body: record.body ?? record });
       }
       yield normalize(desktopProcessStatusListSchema, event);
     }

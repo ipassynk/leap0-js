@@ -58,6 +58,9 @@ function isValidDomainPattern(value: string): boolean {
 }
 
 function isValidCidr(value: string): boolean {
+  if (value.indexOf("/") !== value.lastIndexOf("/")) {
+    return false;
+  }
   const [address, prefix] = value.split("/");
   if (!address || prefix === undefined || !/^\d+$/.test(prefix)) {
     return false;

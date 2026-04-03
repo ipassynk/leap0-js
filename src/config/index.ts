@@ -34,20 +34,25 @@ function resolveSdkOtelFromEnv(envOtel: string | undefined): boolean {
   if (lowered === "false") {
     return false;
   }
-  throw new Error(`Invalid LEAP0_SDK_OTEL_ENABLED value: ${normalizedOtel}`);
+  throw new Leap0Error(`Invalid LEAP0_SDK_OTEL_ENABLED value: ${normalizedOtel}`);
 }
 
 function wrapConfigError(error: unknown): never {
   if (error instanceof ZodError) {
-    throw new Leap0Error(`Invalid Leap0 config: ${error.issues.map((issue) => issue.message).join("; ")}`, {
-      cause: error,
-      body: error.issues,
-    });
+    throw new Leap0Error(
+      `Invalid Leap0 config: ${error.issues.map((issue) => issue.message).join("; ")}`,
+      {
+        cause: error,
+        body: error.issues,
+      },
+    );
   }
   throw error;
 }
 
-function parseConfigOrThrow<T>(result: { success: true; data: T } | { success: false; error: ZodError }): T {
+function parseConfigOrThrow<T>(
+  result: { success: true; data: T } | { success: false; error: ZodError },
+): T {
   if (result.success) {
     return result.data;
   }
@@ -79,15 +84,17 @@ export function resolveConfig(input: Leap0ConfigInput = {}): Leap0ConfigResolved
     const envOtel = readEnv("LEAP0_SDK_OTEL_ENABLED");
     const sdkOtelEnabled = input.sdkOtelEnabled ?? resolveSdkOtelFromEnv(envOtel);
 
-    return parseConfigOrThrow(leap0ConfigResolvedSchema.safeParse({
-      apiKey,
-      baseUrl,
-      sandboxDomain,
-      timeout,
-      authHeader,
-      bearer,
-      sdkOtelEnabled,
-    }));
+    return parseConfigOrThrow(
+      leap0ConfigResolvedSchema.safeParse({
+        apiKey,
+        baseUrl,
+        sandboxDomain,
+        timeout,
+        authHeader,
+        bearer,
+        sdkOtelEnabled,
+      }),
+    );
   } catch (error) {
     wrapConfigError(error);
   }

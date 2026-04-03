@@ -37,8 +37,8 @@ export class SnapshotsClient<T = SandboxData> {
     params: CreateSnapshotParams = {},
     options: RequestOptions = {},
   ): Promise<SnapshotData> {
-    const parsed = createSnapshotParamsSchema.parse(params);
     return withErrorPrefix("Failed to create snapshot: ", async () => {
+      const parsed = createSnapshotParamsSchema.parse(params);
       const data = await this.transport.requestJson<unknown>(
         `/v1/sandbox/${sandboxIdOf(sandbox)}/snapshot/create`,
         { method: "POST", body: jsonBody(parsed) },
@@ -54,8 +54,8 @@ export class SnapshotsClient<T = SandboxData> {
     params: CreateSnapshotParams = {},
     options: RequestOptions = {},
   ): Promise<SnapshotData> {
-    const parsed = createSnapshotParamsSchema.parse(params);
     return withErrorPrefix("Failed to pause sandbox into snapshot: ", async () => {
+      const parsed = createSnapshotParamsSchema.parse(params);
       const data = await this.transport.requestJson<unknown>(
         `/v1/sandbox/${sandboxIdOf(sandbox)}/snapshot/pause`,
         { method: "POST", body: jsonBody(parsed) },
@@ -67,8 +67,8 @@ export class SnapshotsClient<T = SandboxData> {
 
   /** Restores a sandbox from a snapshot. */
   async resume(params: ResumeSnapshotParams, options: RequestOptions = {}): Promise<T> {
-    const parsed = resumeSnapshotParamsSchema.parse(params);
     return withErrorPrefix("Failed to resume snapshot: ", async () => {
+      const parsed = resumeSnapshotParamsSchema.parse(params);
       const data = await this.transport.requestJson<unknown>(
         "/v1/snapshot/resume",
         {

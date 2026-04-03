@@ -17,36 +17,34 @@ export const desktopPointerPositionSchema = z
   .catchall(z.unknown());
 export type DesktopPointerPosition = z.infer<typeof desktopPointerPositionSchema>;
 
-export const desktopSetScreenParamsSchema = z
-  .object({
-    width: z.number().int().min(320).max(7680),
-    height: z.number().int().min(320).max(4320),
-  })
-  .catchall(z.unknown());
+export const desktopSetScreenParamsSchema = z.object({
+  width: z.number().int().min(320).max(7680),
+  height: z.number().int().min(320).max(4320),
+});
 export type DesktopSetScreenParams = z.infer<typeof desktopSetScreenParamsSchema>;
 
-export const desktopScreenshotParamsSchema = z.object({
-  format: z.enum(["png", "jpg", "jpeg"]).optional(),
-  quality: z.number().int().min(1).max(100).optional(),
-  x: z.number().int().min(0).optional(),
-  y: z.number().int().min(0).optional(),
-  width: z.number().int().min(1).optional(),
-  height: z.number().int().min(1).optional(),
-}).refine((params) => (params.width === undefined) === (params.height === undefined), {
-  message: "width and height must be provided together",
-});
-export type DesktopScreenshotParams = z.infer<typeof desktopScreenshotParamsSchema>;
-
-export const desktopScreenshotRegionParamsSchema = z
+export const desktopScreenshotParamsSchema = z
   .object({
-    x: z.number().int().min(0),
-    y: z.number().int().min(0),
-    width: z.number().int().min(1),
-    height: z.number().int().min(1),
     format: z.enum(["png", "jpg", "jpeg"]).optional(),
     quality: z.number().int().min(1).max(100).optional(),
+    x: z.number().int().min(0).optional(),
+    y: z.number().int().min(0).optional(),
+    width: z.number().int().min(1).optional(),
+    height: z.number().int().min(1).optional(),
   })
-  .catchall(z.unknown());
+  .refine((params) => (params.width === undefined) === (params.height === undefined), {
+    message: "width and height must be provided together",
+  });
+export type DesktopScreenshotParams = z.infer<typeof desktopScreenshotParamsSchema>;
+
+export const desktopScreenshotRegionParamsSchema = z.object({
+  x: z.number().int().min(0),
+  y: z.number().int().min(0),
+  width: z.number().int().min(1),
+  height: z.number().int().min(1),
+  format: z.enum(["png", "jpg", "jpeg"]).optional(),
+  quality: z.number().int().min(1).max(100).optional(),
+});
 export type DesktopScreenshotRegionParams = z.infer<typeof desktopScreenshotRegionParamsSchema>;
 
 export const desktopClickParamsSchema = z
@@ -55,29 +53,24 @@ export const desktopClickParamsSchema = z
     y: z.number().int().min(0).optional(),
     button: z.number().int().min(1).max(3).optional(),
   })
-  .catchall(z.unknown())
   .refine((params) => (params.x === undefined) === (params.y === undefined), {
     message: "x and y must be provided together or both omitted",
   });
 export type DesktopClickParams = z.infer<typeof desktopClickParamsSchema>;
 
-export const desktopDragParamsSchema = z
-  .object({
-    fromX: z.number().int().min(0),
-    fromY: z.number().int().min(0),
-    toX: z.number().int().min(0),
-    toY: z.number().int().min(0),
-    button: z.number().int().min(1).max(3).optional(),
-  })
-  .catchall(z.unknown());
+export const desktopDragParamsSchema = z.object({
+  fromX: z.number().int().min(0),
+  fromY: z.number().int().min(0),
+  toX: z.number().int().min(0),
+  toY: z.number().int().min(0),
+  button: z.number().int().min(1).max(3).optional(),
+});
 export type DesktopDragParams = z.infer<typeof desktopDragParamsSchema>;
 
-export const desktopScrollParamsSchema = z
-  .object({
-    direction: z.enum(["up", "down", "left", "right"]),
-    amount: z.number().int().min(1).max(100).optional(),
-  })
-  .catchall(z.unknown());
+export const desktopScrollParamsSchema = z.object({
+  direction: z.enum(["up", "down", "left", "right"]),
+  amount: z.number().int().min(1).max(100).optional(),
+});
 export type DesktopScrollParams = z.infer<typeof desktopScrollParamsSchema>;
 
 export const desktopWindowSchema = z

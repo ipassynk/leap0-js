@@ -54,7 +54,8 @@ test("template client reuses name validation for rename", async () => {
   const { transport } = createRecordedTransport();
   const client = new TemplatesClient(transport as never);
 
-  await assert.doesNotThrow(() => renameTemplateParamsSchema.parse({ name: "system/test" }));
+  await assert.throws(() => renameTemplateParamsSchema.parse({ name: "system/test" }));
+  await assert.doesNotThrow(() => renameTemplateParamsSchema.parse({ name: "renamed" }));
   await assert.rejects(() => client.rename("tpl-1", { name: "" }));
 });
 

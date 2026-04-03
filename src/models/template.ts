@@ -88,7 +88,12 @@ export const createTemplateParamsSchema = z.object({
 export type CreateTemplateParams = z.infer<typeof createTemplateParamsSchema>;
 
 export const templateNameSchema = z.string().superRefine((name, ctx) => {
-  if (!name.trim() || name.length > 64 || /\s/.test(name) || name.toLowerCase().startsWith("system/")) {
+  if (
+    !name.trim() ||
+    name.length > 64 ||
+    /\s/.test(name) ||
+    name.toLowerCase().startsWith("system/")
+  ) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: TEMPLATE_NAME_ERROR_MESSAGE,
@@ -110,8 +115,7 @@ export const createTemplateRequestSchema = createTemplateParamsSchema.extend({
   uri: templateUriSchema,
 });
 
-export const renameTemplateNameSchema = z.string().min(1).max(64);
 export const renameTemplateParamsSchema = z.object({
-  name: renameTemplateNameSchema,
+  name: templateNameSchema,
 });
 export type RenameTemplateParams = z.infer<typeof renameTemplateParamsSchema>;

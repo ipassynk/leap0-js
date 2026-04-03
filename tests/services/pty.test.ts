@@ -4,7 +4,48 @@ import { test } from "vitest";
 import { Leap0WebSocketError } from "@/core/errors.js";
 import type { RequestOptions } from "@/models/index.js";
 import { PtyClient, PtyConnection } from "@/services/pty.js";
-import { createRecordedTransport } from "@tests/utils/helpers.ts";
+import { createRecordedTransport, jsonOf } from "@tests/utils/helpers.ts";
+
+type MockListener = (event?: { data?: unknown }) => void;
+
+function createMockSocket() {
+  const handlers = new Map<string, MockListener[]>();
+  const sent: unknown[] = [];
+  let closed = false;
+
+  const socket = {
+    send(data: unknown) {
+      sent.push(data);
+    },
+    close() {
+      closed = true;
+    },
+    addEventListener(type: string, handler: MockListener) {
+      handlers.set(type, [...(handlers.get(type) ?? []), handler]);
+    },
+    removeEventListener(type: string, handler?: EventListenerOrEventListenerObject | null) {
+      if (handler == null) {
+        handlers.delete(type);
+        return;
+      }
+      const next = (handlers.get(type) ?? []).filter((registered) => registered !== handler);
+      if (next.length === 0) {
+        handlers.delete(type);
+        return;
+      }
+      handlers.set(type, next);
+    },
+  };
+
+  return {
+    socket,
+    handlers,
+    sent,
+    get closed() {
+      return closed;
+    },
+  };
+}
 
 test("pty client sends expected request shapes", async () => {
   const { transport, calls } = createRecordedTransport({
@@ -31,8 +72,22 @@ test("pty client sends expected request shapes", async () => {
   await client.resize("sb-1", "sess-1", 120, 40);
   await client.delete("sb-1", "sess-1");
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/pty");
+  assert.equal(calls[0]?.init.method, "GET");
   assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/pty");
+  assert.equal(calls[1]?.init.method, "POST");
+  assert.deepEqual(jsonOf(calls[1]!), {
+    id: "sess-1",
+    cwd: "/workspace",
+    cols: 80,
+    rows: 24,
+  });
+  assert.equal(calls[2]?.path, "/v1/sandbox/sb-1/pty/sess-1");
+  assert.equal(calls[2]?.init.method, "GET");
   assert.equal(calls[3]?.path, "/v1/sandbox/sb-1/pty/sess-1/resize");
+  assert.equal(calls[3]?.init.method, "POST");
+  assert.deepEqual(jsonOf(calls[3]!), { cols: 120, rows: 40 });
+  assert.equal(calls[4]?.path, "/v1/sandbox/sb-1/pty/sess-1");
+  assert.equal(calls[4]?.init.method, "DELETE");
   assert.equal(
     client.websocketUrl("sb-1", "sess-1"),
     "wss://api.example.com/v1/sandbox/sb-1/pty/sess-1/connect",
@@ -41,65 +96,20 @@ test("pty client sends expected request shapes", async () => {
 });
 
 test("pty connection sends, receives, and closes websocket data", async () => {
-  let sent: unknown;
-  let closed = false;
-  type MockListener = (event?: { data?: unknown }) => void;
-  const handlers = new Map<string, MockListener[]>();
-  const socket = {
-    send(data: unknown) {
-      sent = data;
-    },
-    close() {
-      closed = true;
-    },
-    addEventListener(type: string, handler: MockListener) {
-      handlers.set(type, [...(handlers.get(type) ?? []), handler]);
-    },
-    removeEventListener(type: string, handler?: EventListenerOrEventListenerObject | null) {
-      if (handler == null) {
-        handlers.delete(type);
-        return;
-      }
-      const next = (handlers.get(type) ?? []).filter((registered) => registered !== handler);
-      if (next.length === 0) {
-        handlers.delete(type);
-        return;
-      }
-      handlers.set(type, next);
-    },
-  };
+  const mockSocket = createMockSocket();
+  const { socket, handlers, sent } = mockSocket;
   const connection = new PtyConnection(socket as never);
   connection.send("hello");
   const recv = connection.recv();
   handlers.get("message")?.[0]?.({ data: "world" });
-  assert.equal(sent, "hello");
+  assert.deepEqual(sent, ["hello"]);
   assert.deepEqual(Array.from(await recv), Array.from(new TextEncoder().encode("world")));
   connection.close();
-  assert.equal(closed, true);
+  assert.equal(mockSocket.closed, true);
 });
 
 test("pty connection rejects recv when websocket closes first", async () => {
-  type MockListener = (event?: { data?: unknown }) => void;
-  const handlers = new Map<string, MockListener[]>();
-  const socket = {
-    send() {},
-    close() {},
-    addEventListener(type: string, handler: MockListener) {
-      handlers.set(type, [...(handlers.get(type) ?? []), handler]);
-    },
-    removeEventListener(type: string, handler?: EventListenerOrEventListenerObject | null) {
-      if (handler == null) {
-        handlers.delete(type);
-        return;
-      }
-      const next = (handlers.get(type) ?? []).filter((registered) => registered !== handler);
-      if (next.length === 0) {
-        handlers.delete(type);
-        return;
-      }
-      handlers.set(type, next);
-    },
-  };
+  const { socket, handlers } = createMockSocket();
   const connection = new PtyConnection(socket as never);
 
   const recv = connection.recv();

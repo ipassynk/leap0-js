@@ -63,7 +63,10 @@ test("sandboxes create validates payload and wraps result", async () => {
 test("sandboxes create rejects invalid parameters", async () => {
   const { client } = makeClient();
   await assert.rejects(() => client.create(null as never), /params must be an object/);
-  await assert.rejects(() => client.create({ templateName: 123 as never }), /templateName must be a string/);
+  await assert.rejects(
+    () => client.create({ templateName: 123 as never }),
+    /templateName must be a string/,
+  );
   await assert.rejects(() => client.create({ vcpu: 0 }), Leap0Error);
   await assert.rejects(() => client.create({ memoryMib: 513 }), Leap0Error);
   await assert.rejects(() => client.create({ timeoutMin: 999 }), Leap0Error);

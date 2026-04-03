@@ -83,6 +83,10 @@ export const setPermissionsParamsSchema = z
     owner: z.string().trim().min(1).optional(),
     group: z.string().trim().min(1).optional(),
   })
-  .refine((params) => params.mode !== undefined || params.owner !== undefined || params.group !== undefined, {
-    message: "setPermissions requires at least one of mode, owner, or group",
-  });
+  .refine(
+    (params) =>
+      params.mode !== undefined || params.owner !== undefined || params.group !== undefined,
+    {
+      message: "setPermissions requires at least one of mode, owner, or group",
+    },
+  );

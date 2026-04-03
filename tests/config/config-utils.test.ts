@@ -94,7 +94,14 @@ test("resolveConfig accepts case-insensitive sdk otel env values and rejects inv
   assert.equal(resolveConfig().sdkOtelEnabled, false);
 
   process.env.LEAP0_SDK_OTEL_ENABLED = "maybe";
-  assert.throws(() => resolveConfig(), /Invalid LEAP0_SDK_OTEL_ENABLED value: maybe/);
+  assert.throws(
+    () => resolveConfig(),
+    (error: unknown) => {
+      assert.ok(error instanceof Leap0Error);
+      assert.match(String((error as Error).message), /Invalid LEAP0_SDK_OTEL_ENABLED value: maybe/);
+      return true;
+    },
+  );
 });
 
 test("resolveConfig respects explicit sdk otel disable", () => {

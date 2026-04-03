@@ -158,7 +158,10 @@ test("Sandbox refresh rejects invalid sandbox states", async () => {
     },
   );
 
-  await assert.rejects(() => sandbox.refresh(), /Expected this\.client\.sandboxes\.get\(\) to return SandboxData or Sandbox/);
+  await assert.rejects(
+    () => sandbox.refresh(),
+    /Expected this\.client\.sandboxes\.get\(\) to return SandboxData or Sandbox/,
+  );
 });
 
 test("client and sandbox helpers stay strongly typed", () => {
