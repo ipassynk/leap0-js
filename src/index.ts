@@ -8,9 +8,9 @@ export {
   DEFAULT_TEMPLATE_NAME,
   DEFAULT_TIMEOUT_MIN,
   DEFAULT_VCPU,
-} from "@/config/constants.js"
+} from "@/config/constants.js";
 
-export { SDK_VERSION } from "@/core/version.js"
+export { SDK_VERSION } from "@/core/version.js";
 
 export {
   Leap0ConflictError,
@@ -20,16 +20,16 @@ export {
   Leap0RateLimitError,
   Leap0TimeoutError,
   Leap0WebSocketError,
-} from "@/core/errors.js"
+} from "@/core/errors.js";
 
-export { Leap0Client, Sandbox } from "@/client/index.js"
+export { Leap0Client, Sandbox } from "@/client/index.js";
 export {
   CodeLanguage,
   NetworkPolicyMode,
   RegistryCredentialType,
   SandboxState,
   StreamEventType,
-} from "@/models/index.js"
+} from "@/models/index.js";
 export {
   CodeInterpreterClient,
   DesktopClient,
@@ -43,7 +43,7 @@ export {
   SnapshotsClient,
   SshClient,
   TemplatesClient,
-} from "@/services/index.js"
+} from "@/services/index.js";
 
 export type {
   CodeContext,
@@ -54,6 +54,7 @@ export type {
   CreateSandboxParams,
   CreateSnapshotParams,
   CreateTemplateParams,
+  DesktopClickParams,
   DesktopDisplayInfo,
   DesktopDragParams,
   DesktopHealth,
@@ -64,6 +65,7 @@ export type {
   DesktopProcessStatus,
   DesktopProcessStatusList,
   DesktopRecordingStatus,
+  DesktopScreenshotParams,
   DesktopRecordingSummary,
   DesktopScreenshotRegionParams,
   DesktopScrollParams,
@@ -71,6 +73,7 @@ export type {
   DesktopStatusStreamEvent,
   DesktopWindow,
   EditFileResult,
+  EditFilesResult,
   EditResult,
   ExecutionLogs,
   FileEdit,
@@ -96,4 +99,4 @@ export type {
   TemplateData,
   TreeEntry,
   TreeResult,
-} from "@/models/index.js"
+} from "@/models/index.js";

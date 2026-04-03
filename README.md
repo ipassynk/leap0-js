@@ -30,25 +30,25 @@ export LEAP0_API_KEY="your-api-key"
 Or pass it directly when creating a client:
 
 ```ts
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client({ apiKey: "your-api-key" })
+const client = new Leap0Client({ apiKey: "your-api-key" });
 ```
 
 ## Quick Start
 
 ```ts
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
 
 try {
-  const result = await sandbox.process.execute({ command: "echo hello from leap0" })
-  console.log(result.result.trim())
+  const result = await sandbox.process.execute({ command: "echo hello from leap0" });
+  console.log(result.result.trim());
 } finally {
-  await sandbox.delete()
-  await client.close()
+  await sandbox.delete();
+  await client.close();
 }
 ```
 
@@ -59,10 +59,15 @@ try {
 Stateful code execution with streaming output.
 
 ```ts
-import { CodeLanguage, DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME } from "leap0"
+import { CodeLanguage, DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME } from "leap0";
 
-const sandbox = await client.sandboxes.create({ templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME })
-const result = await sandbox.codeInterpreter.execute({ code: "x = 42", language: CodeLanguage.PYTHON })
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+const result = await sandbox.codeInterpreter.execute({
+  code: "x = 42",
+  language: CodeLanguage.PYTHON,
+});
 ```
 
 ### Filesystem
@@ -70,9 +75,9 @@ const result = await sandbox.codeInterpreter.execute({ code: "x = 42", language:
 Read, write, search, and inspect files inside a sandbox.
 
 ```ts
-await sandbox.filesystem.writeFile("/workspace/hello.txt", "Hello!")
-const content = await sandbox.filesystem.readFile("/workspace/hello.txt")
-const tree = await sandbox.filesystem.tree("/workspace", 2)
+await sandbox.filesystem.writeFile("/workspace/hello.txt", "Hello!");
+const content = await sandbox.filesystem.readFile("/workspace/hello.txt");
+const tree = await sandbox.filesystem.tree("/workspace", 2);
 ```
 
 ### Git
@@ -80,8 +85,8 @@ const tree = await sandbox.filesystem.tree("/workspace", 2)
 Clone repositories and run Git operations inside the sandbox.
 
 ```ts
-await sandbox.git.clone("https://github.com/octocat/Hello-World.git", "/workspace/repo")
-const status = await sandbox.git.status("/workspace/repo")
+await sandbox.git.clone("https://github.com/octocat/Hello-World.git", "/workspace/repo");
+const status = await sandbox.git.status("/workspace/repo");
 ```
 
 ### Process Execution
@@ -89,8 +94,8 @@ const status = await sandbox.git.status("/workspace/repo")
 Run one-off shell commands inside a running sandbox.
 
 ```ts
-const result = await sandbox.process.execute({ command: "ls -la /workspace" })
-console.log(result.result)
+const result = await sandbox.process.execute({ command: "ls -la /workspace" });
+console.log(result.result);
 ```
 
 ### Interactive Terminal (PTY)
@@ -98,7 +103,7 @@ console.log(result.result)
 Open persistent terminal sessions over WebSocket.
 
 ```ts
-const session = await sandbox.pty.create({ cols: 120, rows: 30, cwd: "/home/user" })
+const session = await sandbox.pty.create({ cols: 120, rows: 30, cwd: "/home/user" });
 ```
 
 ### Language Server Protocol (LSP)
@@ -106,7 +111,7 @@ const session = await sandbox.pty.create({ cols: 120, rows: 30, cwd: "/home/user
 Use language servers for completions and editor-style workflows.
 
 ```ts
-await sandbox.lsp.start({ languageId: "python", pathToProject: "/workspace" })
+await sandbox.lsp.start({ languageId: "python", pathToProject: "/workspace" });
 ```
 
 ### SSH Access
@@ -114,8 +119,8 @@ await sandbox.lsp.start({ languageId: "python", pathToProject: "/workspace" })
 Generate temporary SSH credentials for direct sandbox access.
 
 ```ts
-const access = await sandbox.ssh.createAccess()
-console.log(access.hostname, access.port, access.username)
+const access = await sandbox.ssh.createAccess();
+console.log(access.hostname, access.port, access.username);
 ```
 
 ### Desktop Automation
@@ -123,7 +128,7 @@ console.log(access.hostname, access.port, access.username)
 Control a graphical desktop inside the sandbox.
 
 ```ts
-const screenshot = await sandbox.desktop.screenshot()
+const screenshot = await sandbox.desktop.screenshot();
 ```
 
 ### Snapshots
@@ -131,8 +136,8 @@ const screenshot = await sandbox.desktop.screenshot()
 Save and restore sandbox state.
 
 ```ts
-const snapshot = await client.snapshots.create(sandbox, { name: "my-checkpoint" })
-const restored = await client.snapshots.resume({ snapshotName: snapshot.name ?? "my-checkpoint" })
+const snapshot = await client.snapshots.create(sandbox, { name: "my-checkpoint" });
+const restored = await client.snapshots.resume({ snapshotName: snapshot.name ?? "my-checkpoint" });
 ```
 
 ## Supported Imports
@@ -140,7 +145,7 @@ const restored = await client.snapshots.resume({ snapshotName: snapshot.name ?? 
 Import clients, enums, and types from the package root:
 
 ```ts
-import { Leap0Client, SandboxState, type CreateSandboxParams } from "leap0"
+import { Leap0Client, SandboxState, type CreateSandboxParams } from "leap0";
 ```
 
 ## Examples

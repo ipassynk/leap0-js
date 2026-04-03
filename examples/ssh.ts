@@ -1,26 +1,22 @@
-import { Leap0Client } from "../src/index.js"
+import { Leap0Client } from "../src/index.js";
 
 async function main(): Promise<void> {
-  const client = new Leap0Client()
-  let sandbox: Awaited<ReturnType<Leap0Client["sandboxes"]["create"]>> | undefined
+  const client = new Leap0Client();
 
   try {
-    sandbox = await client.sandboxes.create()
+    const sandbox = await client.sandboxes.create();
+    try {
+      const access = await sandbox.ssh.createAccess();
+      console.log("ssh command:", access.sshCommand);
 
-    const access = await sandbox.ssh.createAccess()
-    console.log("ssh command:", `ssh ${access.username}@${access.hostname} -p ${access.port}`)
-
-    const validation = await sandbox.ssh.validateAccess(access.id, access.password ?? "")
-    console.log("ssh valid:", validation.valid)
-  } finally {
-    if (sandbox) {
-      try {
-        await sandbox.delete()
-      } catch {
-      }
+      const validation = await sandbox.ssh.validateAccess(access.id, access.password);
+      console.log("ssh valid:", validation.valid);
+    } finally {
+      await sandbox.delete();
     }
-    await client.close()
+  } finally {
+    await client.close();
   }
 }
 
-void main()
+void main();

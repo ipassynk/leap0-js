@@ -1,5 +1,5 @@
-import { DEFAULT_BASE_URL } from "@/config/constants.js"
-import type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/index.js"
+import { DEFAULT_BASE_URL } from "@/config/constants.js";
+import type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/index.js";
 
 /**
  * Extracts a sandbox ID from a string or sandbox-like object.
@@ -11,7 +11,7 @@ import type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/index.js"
  *   The sandbox ID string.
  */
 export function sandboxIdOf(sandbox: SandboxRef): string {
-  return typeof sandbox === "string" ? sandbox : sandbox.id
+  return typeof sandbox === "string" ? sandbox : sandbox.id;
 }
 
 /**
@@ -24,7 +24,7 @@ export function sandboxIdOf(sandbox: SandboxRef): string {
  *   The snapshot ID string.
  */
 export function snapshotIdOf(snapshot: SnapshotRef): string {
-  return typeof snapshot === "string" ? snapshot : snapshot.id
+  return typeof snapshot === "string" ? snapshot : snapshot.id;
 }
 
 /**
@@ -37,7 +37,7 @@ export function snapshotIdOf(snapshot: SnapshotRef): string {
  *   The template ID string.
  */
 export function templateIdOf(template: TemplateRef): string {
-  return typeof template === "string" ? template : template.id
+  return typeof template === "string" ? template : template.id;
 }
 
 /**
@@ -50,7 +50,7 @@ export function templateIdOf(template: TemplateRef): string {
  *   The normalized string.
  */
 export function trimSlash(value: string): string {
-  return value.replace(/\/+$/, "")
+  return value.replace(/\/+$/, "");
 }
 
 /**
@@ -63,7 +63,7 @@ export function trimSlash(value: string): string {
  *   The normalized path.
  */
 export function ensureLeadingSlash(value: string): string {
-  return value.startsWith("/") ? value : `/${value}`
+  return value.startsWith("/") ? value : `/${value}`;
 }
 
 /**
@@ -78,8 +78,9 @@ export function ensureLeadingSlash(value: string): string {
  *   The HTTPS origin for the sandbox.
  */
 export function sandboxBaseUrl(sandboxId: string, sandboxDomain: string, port?: number): string {
-  const host = port == null ? `${sandboxId}.${sandboxDomain}` : `${sandboxId}-${port}.${sandboxDomain}`
-  return `https://${host}`
+  const host =
+    port == null ? `${sandboxId}.${sandboxDomain}` : `${sandboxId}-${port}.${sandboxDomain}`;
+  return `https://${host}`;
 }
 
 /**
@@ -92,9 +93,9 @@ export function sandboxBaseUrl(sandboxId: string, sandboxDomain: string, port?: 
  *   The websocket URL.
  */
 export function websocketUrlFromHttp(url: string): string {
-  if (url.startsWith("https://")) return `wss://${url.slice("https://".length)}`
-  if (url.startsWith("http://")) return `ws://${url.slice("http://".length)}`
-  return url
+  if (url.startsWith("https://")) return `wss://${url.slice("https://".length)}`;
+  if (url.startsWith("http://")) return `ws://${url.slice("http://".length)}`;
+  return url;
 }
 
 /**
@@ -107,14 +108,17 @@ export function websocketUrlFromHttp(url: string): string {
  * Returns:
  *   The path with query string applied.
  */
-export function withQuery(path: string, query?: Record<string, string | number | boolean | undefined>): string {
-  const url = new URL(path, DEFAULT_BASE_URL)
+export function withQuery(
+  path: string,
+  query?: Record<string, string | number | boolean | undefined>,
+): string {
+  const url = new URL(path, DEFAULT_BASE_URL);
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined) {
-      url.searchParams.set(key, String(value))
+      url.searchParams.set(key, String(value));
     }
   }
-  return `${url.pathname}${url.search}`
+  return `${url.pathname}${url.search}`;
 }
 
 /**
@@ -127,6 +131,6 @@ export function withQuery(path: string, query?: Record<string, string | number |
  *   The corresponding file URI.
  */
 export function toFileUri(path: string): string {
-  if (path.startsWith("file://")) return path
-  return `file://${path.startsWith("/") ? "" : "/"}${path}`
+  if (path.startsWith("file://")) return path;
+  return `file://${path.startsWith("/") ? "" : "/"}${path}`;
 }

@@ -1,11 +1,11 @@
-export { CodeInterpreterClient } from "@/services/code-interpreter.js"
-export { DesktopClient } from "@/services/desktop.js"
-export { FilesystemClient } from "@/services/filesystem.js"
-export { GitClient } from "@/services/git.js"
-export { LspClient } from "@/services/lsp.js"
-export { ProcessClient } from "@/services/process.js"
-export { PtyClient, PtyConnection } from "@/services/pty.js"
-export { SandboxesClient } from "@/services/sandboxes.js"
-export { SnapshotsClient } from "@/services/snapshots.js"
-export { SshClient } from "@/services/ssh.js"
-export { TemplatesClient } from "@/services/templates.js"
+export { CodeInterpreterClient } from "@/services/code-interpreter.js";
+export { DesktopClient } from "@/services/desktop.js";
+export { FilesystemClient } from "@/services/filesystem.js";
+export { GitClient } from "@/services/git.js";
+export { LspClient } from "@/services/lsp.js";
+export { ProcessClient } from "@/services/process.js";
+export { PtyClient, PtyConnection } from "@/services/pty.js";
+export { SandboxesClient, type SandboxFactory } from "@/services/sandboxes.js";
+export { SnapshotsClient } from "@/services/snapshots.js";
+export { SshClient } from "@/services/ssh.js";
+export { TemplatesClient } from "@/services/templates.js";
