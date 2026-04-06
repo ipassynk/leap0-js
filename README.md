@@ -45,7 +45,9 @@ const sandbox = await client.sandboxes.create();
 
 try {
   const result = await sandbox.process.execute({ command: "echo hello from leap0" });
-  console.log(result.result.trim());
+  console.log(result.exitCode);
+  console.log(result.stdout.trim());
+  console.log(result.stderr.trim());
 } finally {
   await sandbox.delete();
   await client.close();
@@ -95,7 +97,8 @@ Run one-off shell commands inside a running sandbox.
 
 ```ts
 const result = await sandbox.process.execute({ command: "ls -la /workspace" });
-console.log(result.result);
+console.log(result.stdout);
+console.log(result.stderr);
 ```
 
 ### Interactive Terminal (PTY)
