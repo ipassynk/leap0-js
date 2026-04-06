@@ -9,7 +9,8 @@ async function main(): Promise<void> {
     const result = await sandbox.process.execute({ command: "echo hello from leap0" });
     console.log("sandbox:", sandbox.id);
     console.log("exit code:", result.exitCode);
-    console.log("result:", result.result.trim());
+    console.log("stdout:", result.stdout.trim());
+    console.log("stderr:", result.stderr.trim());
   } finally {
     if (sandbox) {
       await sandbox.delete();
