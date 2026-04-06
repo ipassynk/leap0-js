@@ -346,8 +346,13 @@ export class Leap0Transport {
         buffer = buffer.slice(boundary + 2);
         const dataLines = rawEvent
           .split("\n")
-          .filter((line) => line.startsWith("data:"))
-          .map((line) => line.slice(5).trim());
+          .filter((line) => !line.startsWith(":"))
+          .flatMap((line) => {
+            if (line.startsWith("event:")) return [];
+            if (!line.startsWith("data:")) return [];
+            const value = line.slice(5);
+            return [value.startsWith(" ") ? value.slice(1) : value];
+          });
         if (dataLines.length === 0) continue;
         const payload = dataLines.join("\n");
         if (!payload || payload === "[DONE]") continue;

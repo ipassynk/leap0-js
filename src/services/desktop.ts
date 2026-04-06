@@ -405,11 +405,8 @@ export class DesktopClient {
         throw new Leap0Error("Malformed desktop status stream event");
       }
       const record = asRecord(event);
-      if (record.error !== undefined) {
-        throw new Leap0Error("Desktop status stream error", { body: record.error });
-      }
       if (typeof record.message === "string") {
-        throw new Leap0Error(String(record.message), { body: record.body ?? record });
+        throw new Leap0Error("Desktop status stream error", { body: record.message });
       }
       yield normalize(desktopProcessStatusListSchema, event);
     }
@@ -427,8 +424,6 @@ export class DesktopClient {
             return;
           }
           if (
-            typeof status.running === "number" &&
-            typeof status.total === "number" &&
             status.total > 0 &&
             status.running >= status.total
           ) {

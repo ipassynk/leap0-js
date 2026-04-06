@@ -127,10 +127,10 @@ test("desktop statusStream parses SSE and raises API errors", async () => {
   // health endpoint tested separately, it accepts 503 gracefully
 });
 
-test("desktop statusStream throws Leap0Error for SSE error frames", async () => {
+test("desktop statusStream throws Leap0Error for structured SSE message frames", async () => {
   const { transport } = createRecordedTransport({
     streamJsonUrl: async function* () {
-      yield { error: "Desktop request failed" };
+      yield { message: "Desktop request failed" };
     },
   });
   const client = new DesktopClient(transport as never);
