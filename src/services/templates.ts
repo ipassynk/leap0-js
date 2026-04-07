@@ -31,6 +31,7 @@ export class TemplatesClient {
   /**
    * Uploads a new template from a container image URI.
    *
+   * @param params Template creation parameters.
    * @param params.name Template name to create.
    * @param params.uri Container image URI to import.
    * @param params.credentials Optional private registry credentials.
@@ -72,7 +73,12 @@ export class TemplatesClient {
     });
   }
 
-  /** Deletes a template by ID. */
+  /**
+   * Deletes a template by ID.
+   *
+   * @param template Template ID or template-like object.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async delete(template: TemplateRef, options: RequestOptions = {}): Promise<void> {
     await withErrorPrefix("Failed to delete template: ", () =>
       this.transport.request(

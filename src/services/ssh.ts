@@ -28,7 +28,12 @@ export class SshClient {
     return normalize(sshAccessSchema, data);
   }
 
-  /** Deletes the active SSH credentials for a sandbox. */
+  /**
+   * Deletes the active SSH credentials for a sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async deleteAccess(sandbox: SandboxRef, options: RequestOptions = {}): Promise<void> {
     await this.transport.request(
       `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/access`,

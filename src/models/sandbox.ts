@@ -208,7 +208,12 @@ type NetworkPolicyWire = {
   }>;
 };
 
-/** Converts SDK network policy input into the wire format expected by the API. */
+/**
+ * Converts SDK network policy input into the wire format expected by the API.
+ *
+ * @param policy SDK network policy configuration.
+ * @returns The API wire-format network policy.
+ */
 export function toNetworkPolicyWire(
   policy: NetworkPolicy | undefined,
 ): NetworkPolicyWire | undefined {

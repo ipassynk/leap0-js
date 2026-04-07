@@ -4,11 +4,8 @@ import type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/index.js";
 /**
  * Extracts a sandbox ID from a string or sandbox-like object.
  *
- * Args:
- *   sandbox: Sandbox reference value.
- *
- * Returns:
- *   The sandbox ID string.
+ * @param sandbox Sandbox reference value.
+ * @returns The sandbox ID string.
  */
 export function sandboxIdOf(sandbox: SandboxRef): string {
   return typeof sandbox === "string" ? sandbox : sandbox.id;
@@ -17,11 +14,8 @@ export function sandboxIdOf(sandbox: SandboxRef): string {
 /**
  * Extracts a snapshot ID from a string or snapshot-like object.
  *
- * Args:
- *   snapshot: Snapshot reference value.
- *
- * Returns:
- *   The snapshot ID string.
+ * @param snapshot Snapshot reference value.
+ * @returns The snapshot ID string.
  */
 export function snapshotIdOf(snapshot: SnapshotRef): string {
   return typeof snapshot === "string" ? snapshot : snapshot.id;
@@ -30,11 +24,8 @@ export function snapshotIdOf(snapshot: SnapshotRef): string {
 /**
  * Extracts a template ID from a string or template-like object.
  *
- * Args:
- *   template: Template reference value.
- *
- * Returns:
- *   The template ID string.
+ * @param template Template reference value.
+ * @returns The template ID string.
  */
 export function templateIdOf(template: TemplateRef): string {
   return typeof template === "string" ? template : template.id;
@@ -43,11 +34,8 @@ export function templateIdOf(template: TemplateRef): string {
 /**
  * Removes trailing slashes from a string.
  *
- * Args:
- *   value: Value to normalize.
- *
- * Returns:
- *   The normalized string.
+ * @param value Value to normalize.
+ * @returns The normalized string.
  */
 export function trimSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -56,11 +44,8 @@ export function trimSlash(value: string): string {
 /**
  * Ensures a path starts with a leading slash.
  *
- * Args:
- *   value: Path fragment to normalize.
- *
- * Returns:
- *   The normalized path.
+ * @param value Path fragment to normalize.
+ * @returns The normalized path.
  */
 export function ensureLeadingSlash(value: string): string {
   return value.startsWith("/") ? value : `/${value}`;
@@ -69,13 +54,10 @@ export function ensureLeadingSlash(value: string): string {
 /**
  * Builds the public base URL for a sandbox host.
  *
- * Args:
- *   sandboxId: Sandbox identifier.
- *   sandboxDomain: Shared sandbox domain suffix.
- *   port: Optional forwarded port.
- *
- * Returns:
- *   The HTTPS origin for the sandbox.
+ * @param sandboxId Sandbox identifier.
+ * @param sandboxDomain Shared sandbox domain suffix.
+ * @param port Optional forwarded port.
+ * @returns The HTTPS origin for the sandbox.
  */
 export function sandboxBaseUrl(sandboxId: string, sandboxDomain: string, port?: number): string {
   const host =
@@ -86,11 +68,8 @@ export function sandboxBaseUrl(sandboxId: string, sandboxDomain: string, port?: 
 /**
  * Converts an HTTP sandbox URL to a websocket URL.
  *
- * Args:
- *   url: HTTP or HTTPS URL.
- *
- * Returns:
- *   The websocket URL.
+ * @param url HTTP or HTTPS URL.
+ * @returns The websocket URL.
  */
 export function websocketUrlFromHttp(url: string): string {
   if (url.startsWith("https://")) return `wss://${url.slice("https://".length)}`;
@@ -101,12 +80,9 @@ export function websocketUrlFromHttp(url: string): string {
 /**
  * Appends query parameters to a request path.
  *
- * Args:
- *   path: Path to append query parameters to.
- *   query: Query values to serialize.
- *
- * Returns:
- *   The path with query string applied.
+ * @param path Path to append query parameters to.
+ * @param query Query values to serialize.
+ * @returns The path with query string applied.
  */
 export function withQuery(
   path: string,
@@ -124,11 +100,8 @@ export function withQuery(
 /**
  * Converts a filesystem path into a file URI.
  *
- * Args:
- *   path: Absolute or relative file path.
- *
- * Returns:
- *   The corresponding file URI.
+ * @param path Absolute or relative file path.
+ * @returns The corresponding file URI.
  */
 export function toFileUri(path: string): string {
   if (path.startsWith("file://")) return path;

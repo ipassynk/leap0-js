@@ -16,6 +16,7 @@ export class ProcessClient {
    * Executes a one-shot command inside the sandbox.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Command execution parameters.
    * @param params.command Command line to execute.
    * @param params.cwd Optional working directory.
    * @param params.timeout Optional command timeout in milliseconds.

@@ -62,11 +62,8 @@ function parseConfigOrThrow<T>(
 /**
  * Resolves SDK configuration from explicit input and environment variables.
  *
- * Args:
- *   input: Partial client configuration overrides.
- *
- * Returns:
- *   The validated runtime configuration used by the SDK.
+ * @param input Partial client configuration overrides.
+ * @returns The validated runtime configuration used by the SDK.
  */
 export function resolveConfig(input: Leap0ConfigInput = {}): Leap0ConfigResolved {
   try {

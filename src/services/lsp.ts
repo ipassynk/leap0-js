@@ -48,7 +48,15 @@ export class LspClient {
     return { text: textOrOptions, version: versionOrOptions ?? 1, options };
   }
 
-  /** Starts a language server for a project path inside the sandbox. */
+  /**
+   * Starts a language server for a project path inside the sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The language server response payload.
+   */
   async start(
     sandbox: SandboxRef,
     languageId: string,
@@ -62,7 +70,15 @@ export class LspClient {
       options,
     );
   }
-  /** Stops a previously started language server. */
+  /**
+   * Stops a previously started language server.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The language server response payload.
+   */
   async stop(
     sandbox: SandboxRef,
     languageId: string,
@@ -79,6 +95,9 @@ export class LspClient {
   /**
    * Opens a document in the language server.
    *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
    * @param uri File URI to open.
    * @param textOrOptions Optional in-memory document text, or request options when opening from disk.
    * @param versionOrOptions Optional document version, or request options when no explicit version is needed.
@@ -122,7 +141,17 @@ export class LspClient {
       normalizedOptions,
     );
   }
-  /** Opens a document by filesystem path instead of a file URI. */
+  /**
+   * Opens a document by filesystem path instead of a file URI.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param path Filesystem path to open.
+   * @param textOrOptions Optional in-memory document text, or request options when opening from disk.
+   * @param versionOrOptions Optional document version, or request options when no explicit version is needed.
+   * @param options Optional request options.
+   */
   async didOpenPath(
     sandbox: SandboxRef,
     languageId: string,
@@ -142,7 +171,15 @@ export class LspClient {
       options,
     );
   }
-  /** Closes a previously opened document. */
+  /**
+   * Closes a previously opened document.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param uri File URI to close.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async didClose(
     sandbox: SandboxRef,
     languageId: string,
@@ -159,7 +196,15 @@ export class LspClient {
       options,
     );
   }
-  /** Closes a document by filesystem path instead of a file URI. */
+  /**
+   * Closes a document by filesystem path instead of a file URI.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param path Filesystem path to close.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async didClosePath(
     sandbox: SandboxRef,
     languageId: string,
@@ -172,6 +217,13 @@ export class LspClient {
   /**
    * Requests completion items at a line/character position.
    *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param uri File URI to inspect.
+   * @param line Zero-based line number.
+   * @param character Zero-based character offset.
+   * @param options Optional request settings such as timeout and query params.
    * @returns The raw JSON-RPC response from the language server.
    */
   async completions(
@@ -195,7 +247,18 @@ export class LspClient {
       options,
     );
   }
-  /** Requests completion items for a filesystem path. */
+  /**
+   * Requests completion items for a filesystem path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param path Filesystem path to inspect.
+   * @param line Zero-based line number.
+   * @param character Zero-based character offset.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The raw JSON-RPC response from the language server.
+   */
   async completionsPath(
     sandbox: SandboxRef,
     languageId: string,
@@ -215,7 +278,16 @@ export class LspClient {
       options,
     );
   }
-  /** Returns document symbols for an open document. */
+  /**
+   * Returns document symbols for an open document.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param uri File URI to inspect.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The raw JSON-RPC response from the language server.
+   */
   async documentSymbols(
     sandbox: SandboxRef,
     languageId: string,
@@ -230,7 +302,16 @@ export class LspClient {
       options,
     );
   }
-  /** Returns document symbols for a filesystem path. */
+  /**
+   * Returns document symbols for a filesystem path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param languageId Language server identifier.
+   * @param pathToProject Project path inside the sandbox.
+   * @param path Filesystem path to inspect.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The raw JSON-RPC response from the language server.
+   */
   async documentSymbolsPath(
     sandbox: SandboxRef,
     languageId: string,

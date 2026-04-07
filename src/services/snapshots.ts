@@ -108,7 +108,12 @@ export class SnapshotsClient<T = SandboxData> {
     });
   }
 
-  /** Deletes a snapshot by ID. */
+  /**
+   * Deletes a snapshot by ID.
+   *
+   * @param snapshot Snapshot ID or snapshot-like object.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async delete(snapshot: SnapshotRef, options: RequestOptions = {}): Promise<void> {
     await withErrorPrefix("Failed to delete snapshot: ", () =>
       this.transport.request(

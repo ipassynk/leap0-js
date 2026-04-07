@@ -152,11 +152,8 @@ export class Sandbox implements SandboxData {
   /**
    * Applies fresh sandbox data onto the current handle.
    *
-   * Args:
-   *   data: Latest sandbox payload.
-   *
-   * Returns:
-   *   The updated sandbox handle.
+   * @param data Latest sandbox payload.
+   * @returns The updated sandbox handle.
    */
   private update(data: SandboxData): this {
     this.id = data.id;
@@ -178,8 +175,7 @@ export class Sandbox implements SandboxData {
   /**
    * Fetches the latest sandbox state from the API.
    *
-   * Returns:
-   *   The refreshed sandbox handle.
+   * @returns The refreshed sandbox handle.
    *
    * @throws {Leap0Error} If fetching the sandbox fails.
    */
@@ -192,11 +188,8 @@ export class Sandbox implements SandboxData {
   /**
    * Pauses the sandbox and updates local state.
    *
-   * Args:
-   *   options: Optional request settings.
-   *
-   * Returns:
-   *   The paused sandbox handle.
+   * @param options Optional request settings.
+   * @returns The paused sandbox handle.
    *
    * @throws {Leap0Error} If pausing the sandbox fails.
    */
@@ -208,8 +201,7 @@ export class Sandbox implements SandboxData {
   /**
    * Deletes the sandbox.
    *
-   * Args:
-   *   options: Optional request settings.
+   * @param options Optional request settings.
    *
    * @throws {Leap0Error} If deleting the sandbox fails.
    */
@@ -220,12 +212,9 @@ export class Sandbox implements SandboxData {
   /**
    * Returns the public invoke URL for the sandbox.
    *
-   * Args:
-   *   path: Route path to append.
-   *   port: Optional forwarded port.
-   *
-   * Returns:
-   *   The public HTTPS URL.
+   * @param path Route path to append.
+   * @param port Optional forwarded port.
+   * @returns The public HTTPS URL.
    */
   invokeUrl(path = "/", port?: number): string {
     return this.client.sandboxes.invokeUrl(this.id, path, port);
@@ -234,12 +223,9 @@ export class Sandbox implements SandboxData {
   /**
    * Returns the public websocket URL for the sandbox.
    *
-   * Args:
-   *   path: Route path to append.
-   *   port: Optional forwarded port.
-   *
-   * Returns:
-   *   The public websocket URL.
+   * @param path Route path to append.
+   * @param port Optional forwarded port.
+   * @returns The public websocket URL.
    */
   websocketUrl(path = "/", port?: number): string {
     return this.client.sandboxes.websocketUrl(this.id, path, port);

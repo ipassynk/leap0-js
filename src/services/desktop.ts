@@ -60,7 +60,12 @@ export class DesktopClient {
     return `${sandboxBaseUrl(sandboxIdOf(sandbox), this.transport.sandboxDomain)}${path}`;
   }
 
-  /** Returns the base desktop URL for opening the remote UI in a browser. */
+  /**
+   * Returns the base desktop URL for opening the remote UI in a browser.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @returns The base desktop URL.
+   */
   desktopUrl(sandbox: SandboxRef): string {
     return `${sandboxBaseUrl(sandboxIdOf(sandbox), this.transport.sandboxDomain)}/`;
   }
@@ -78,7 +83,13 @@ export class DesktopClient {
     );
   }
 
-  /** Returns display metadata for the desktop session. */
+  /**
+   * Returns display metadata for the desktop session.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Desktop display metadata.
+   */
   async displayInfo(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo> {
     return this.requestJson(
       sandbox,
@@ -88,7 +99,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns the currently active desktop screen geometry. */
+  /**
+   * Returns the currently active desktop screen geometry.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Desktop screen geometry.
+   */
   async screen(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo> {
     return this.requestJson(
       sandbox,
@@ -98,7 +115,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Resizes the desktop screen to the requested dimensions. */
+  /**
+   * Resizes the desktop screen to the requested dimensions.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param payload Screen resize parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Updated desktop display metadata.
+   */
   async resizeScreen(
     sandbox: SandboxRef,
     payload: DesktopSetScreenParams,
@@ -113,7 +137,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Lists windows visible on the desktop. */
+  /**
+   * Lists windows visible on the desktop.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The visible desktop windows.
+   */
   async windows(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopWindow[]> {
     return this.requestJson(
       sandbox,
@@ -123,7 +153,14 @@ export class DesktopClient {
       options,
     ).then((r) => r.items);
   }
-  /** Captures a screenshot and returns raw image bytes. */
+  /**
+   * Captures a screenshot and returns raw image bytes.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Screenshot parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Raw screenshot bytes.
+   */
   async screenshot(
     sandbox: SandboxRef,
     params: DesktopScreenshotParams = {},
@@ -136,7 +173,14 @@ export class DesktopClient {
       { ...options, query: parsed },
     );
   }
-  /** Captures a screenshot of a required rectangular region. */
+  /**
+   * Captures a screenshot of a required rectangular region.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param payload Region screenshot parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Raw screenshot bytes.
+   */
   async screenshotRegion(
     sandbox: SandboxRef,
     payload: DesktopScreenshotRegionParams,
@@ -149,7 +193,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns the current pointer position. */
+  /**
+   * Returns the current pointer position.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The current pointer position.
+   */
   async pointerPosition(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -162,7 +212,15 @@ export class DesktopClient {
       options,
     );
   }
-  /** Moves the desktop pointer to a coordinate. */
+  /**
+   * Moves the desktop pointer to a coordinate.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param x Horizontal coordinate.
+   * @param y Vertical coordinate.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The updated pointer position.
+   */
   async movePointer(
     sandbox: SandboxRef,
     x: number,
@@ -177,7 +235,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Clicks the current pointer position or an explicit coordinate. */
+  /**
+   * Clicks the current pointer position or an explicit coordinate.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Click parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The resulting pointer position.
+   */
   async click(
     sandbox: SandboxRef,
     params: DesktopClickParams = {},
@@ -192,7 +257,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Drags the pointer from one coordinate to another. */
+  /**
+   * Drags the pointer from one coordinate to another.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param payload Drag parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The resulting pointer position.
+   */
   async drag(
     sandbox: SandboxRef,
     payload: DesktopDragParams,
@@ -216,7 +288,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Scrolls the desktop in the requested direction. */
+  /**
+   * Scrolls the desktop in the requested direction.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param payload Scroll parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The resulting pointer position.
+   */
   async scroll(
     sandbox: SandboxRef,
     payload: DesktopScrollParams,
@@ -231,7 +310,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Types text into the active desktop input target. */
+  /**
+   * Types text into the active desktop input target.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param text Text to type.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Whether the action succeeded.
+   */
   async typeText(sandbox: SandboxRef, text: string, options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/type"),
@@ -240,7 +326,14 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
-  /** Sends a single key press to the desktop. */
+  /**
+   * Sends a single key press to the desktop.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param key Key to press.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Whether the action succeeded.
+   */
   async pressKey(sandbox: SandboxRef, key: string, options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/press"),
@@ -249,7 +342,14 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
-  /** Sends a key chord such as `Ctrl+C` or `Cmd+Shift+P`. */
+  /**
+   * Sends a key chord such as `Ctrl+C` or `Cmd+Shift+P`.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param keys Keys to press together.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Whether the action succeeded.
+   */
   async hotkey(sandbox: SandboxRef, keys: string[], options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/hotkey"),
@@ -258,7 +358,13 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
-  /** Returns current desktop recording state. */
+  /**
+   * Returns current desktop recording state.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The current recording state.
+   */
   async recordingStatus(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -271,7 +377,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Starts desktop recording. */
+  /**
+   * Starts desktop recording.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The updated recording state.
+   */
   async startRecording(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -284,7 +396,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Stops desktop recording. */
+  /**
+   * Stops desktop recording.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The updated recording state.
+   */
   async stopRecording(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -297,7 +415,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Lists recorded desktop sessions. */
+  /**
+   * Lists recorded desktop sessions.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Desktop recording summaries.
+   */
   async recordings(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -310,7 +434,14 @@ export class DesktopClient {
       options,
     ).then((r) => r.items);
   }
-  /** Fetches metadata for a single recording. */
+  /**
+   * Fetches metadata for a single recording.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param id Recording identifier.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The recording metadata.
+   */
   async getRecording(
     sandbox: SandboxRef,
     id: string,
@@ -324,7 +455,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Downloads a recording and returns raw file bytes. */
+  /**
+   * Downloads a recording and returns raw file bytes.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param id Recording identifier.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Raw recording file bytes.
+   */
   async downloadRecording(
     sandbox: SandboxRef,
     id: string,
@@ -336,7 +474,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Deletes a recording by ID. */
+  /**
+   * Deletes a recording by ID.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param id Recording identifier.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async deleteRecording(sandbox: SandboxRef, id: string, options?: RequestOptions): Promise<void> {
     await this.transport.requestUrl(
       this.requestUrl(sandbox, `/api/recordings/${encodeURIComponent(id)}`),
@@ -344,7 +488,13 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns desktop service health, accepting both healthy and degraded status codes. */
+  /**
+   * Returns desktop service health, accepting both healthy and degraded status codes.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Desktop health information.
+   */
   async health(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopHealth> {
     return this.requestJson(
       sandbox,
@@ -354,7 +504,13 @@ export class DesktopClient {
       { ...options, expectedStatus: [200, 503] },
     );
   }
-  /** Returns aggregate status for desktop-managed processes. */
+  /**
+   * Returns aggregate status for desktop-managed processes.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Aggregate process status information.
+   */
   async processStatus(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -367,7 +523,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns status for a named desktop-managed process. */
+  /**
+   * Returns status for a named desktop-managed process.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param name Process name.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Status for the named process.
+   */
   async getProcess(
     sandbox: SandboxRef,
     name: string,
@@ -381,7 +544,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Restarts a named desktop-managed process. */
+  /**
+   * Restarts a named desktop-managed process.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param name Process name.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The restart operation result.
+   */
   async restartProcess(
     sandbox: SandboxRef,
     name: string,
@@ -395,7 +565,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns logs for a named desktop-managed process. */
+  /**
+   * Returns logs for a named desktop-managed process.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param name Process name.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Process logs.
+   */
   async processLogs(
     sandbox: SandboxRef,
     name: string,
@@ -409,7 +586,14 @@ export class DesktopClient {
       options,
     );
   }
-  /** Returns error logs for a named desktop-managed process. */
+  /**
+   * Returns error logs for a named desktop-managed process.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param name Process name.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Process error logs.
+   */
   async processErrors(
     sandbox: SandboxRef,
     name: string,
@@ -427,6 +611,9 @@ export class DesktopClient {
   /**
    * Streams desktop process status updates.
    *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @yields Desktop status stream events.
    * @throws {Leap0Error} If the stream returns malformed events or reports an error envelope.
    */
   async *statusStream(
@@ -452,6 +639,8 @@ export class DesktopClient {
   /**
    * Waits until the desktop reports a running state or all tracked processes are up.
    *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param timeout Timeout in seconds.
    * @throws {Leap0Error} If the desktop never becomes ready or a non-retryable error occurs.
    *
    * @example
