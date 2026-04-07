@@ -9,6 +9,9 @@ const ENV_REF_RE = /\$\{([A-Za-z_][A-Za-z0-9_]*)}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
 function expandEnv(value: string, env: Record<string, string>): string {
   return value.replace(ENV_REF_RE, (match, bracketed, plain) => {
     const key = bracketed ?? plain;
+    if (!Object.prototype.hasOwnProperty.call(env, key)) {
+      return match;
+    }
     return env[key] ?? match;
   });
 }
