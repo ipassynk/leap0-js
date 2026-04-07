@@ -83,30 +83,53 @@ class SandboxServiceProxy<Service extends object> {
 
 /**
  * Bound sandbox handle with convenience methods and resource-scoped helpers.
+ *
+ * @throws {Leap0Error} If API requests or response validation fail.
  */
 export class Sandbox implements SandboxData {
+  /** Unique sandbox ID. */
   id!: string;
+  /** Template ID the sandbox was created from. */
   templateId!: string;
+  /** Template name, when available from the API response. */
   templateName?: string;
+  /** Current sandbox lifecycle state. */
   state!: SandboxState;
+  /** Number of virtual CPUs assigned to the sandbox. */
   vcpu!: number;
+  /** Allocated memory in MiB. */
   memoryMib!: number;
+  /** Allocated disk in MiB. */
   diskMib!: number;
+  /** Auto-shutdown timeout in minutes, when configured. */
   timeoutMin?: number;
+  /** Whether the sandbox automatically pauses when idle. */
   autoPause?: boolean;
+  /** Environment variables configured for the sandbox. */
   envVars?: Record<string, string>;
+  /** Network policy attached to the sandbox. */
   networkPolicy?: SandboxData["networkPolicy"];
+  /** Creation timestamp in ISO 8601 format. */
   createdAt!: string;
+  /** Last update timestamp in ISO 8601 format, when available. */
   updatedAt?: string;
   [key: string]: unknown;
 
+  /** Filesystem operations scoped to this sandbox. */
   readonly filesystem: BoundSandboxService<FilesystemClient>;
+  /** Git operations scoped to this sandbox. */
   readonly git: BoundSandboxService<GitClient>;
+  /** One-shot process execution scoped to this sandbox. */
   readonly process: BoundSandboxService<ProcessClient>;
+  /** PTY session management scoped to this sandbox. */
   readonly pty: BoundSandboxService<PtyClient>;
+  /** Language-server operations scoped to this sandbox. */
   readonly lsp: BoundSandboxService<LspClient>;
+  /** SSH access management scoped to this sandbox. */
   readonly ssh: BoundSandboxService<SshClient>;
+  /** Code interpreter operations scoped to this sandbox. */
   readonly codeInterpreter: BoundSandboxService<CodeInterpreterClient>;
+  /** Desktop automation operations scoped to this sandbox. */
   readonly desktop: BoundSandboxService<DesktopClient>;
 
   /** Creates a sandbox handle bound to a parent client. */
@@ -129,11 +152,8 @@ export class Sandbox implements SandboxData {
   /**
    * Applies fresh sandbox data onto the current handle.
    *
-   * Args:
-   *   data: Latest sandbox payload.
-   *
-   * Returns:
-   *   The updated sandbox handle.
+   * @param data Latest sandbox payload.
+   * @returns The updated sandbox handle.
    */
   private update(data: SandboxData): this {
     this.id = data.id;
@@ -155,8 +175,9 @@ export class Sandbox implements SandboxData {
   /**
    * Fetches the latest sandbox state from the API.
    *
-   * Returns:
-   *   The refreshed sandbox handle.
+   * @returns The refreshed sandbox handle.
+   *
+   * @throws {Leap0Error} If fetching the sandbox fails.
    */
   async refresh(): Promise<this> {
     const latest = await this.client.sandboxes.get(this.id);
@@ -167,11 +188,10 @@ export class Sandbox implements SandboxData {
   /**
    * Pauses the sandbox and updates local state.
    *
-   * Args:
-   *   options: Optional request settings.
+   * @param options Optional request settings.
+   * @returns The paused sandbox handle.
    *
-   * Returns:
-   *   The paused sandbox handle.
+   * @throws {Leap0Error} If pausing the sandbox fails.
    */
   async pause(options?: { timeout?: number }): Promise<this> {
     this.update((await this.client.sandboxes.pause(this.id, options)) as SandboxData);
@@ -181,8 +201,9 @@ export class Sandbox implements SandboxData {
   /**
    * Deletes the sandbox.
    *
-   * Args:
-   *   options: Optional request settings.
+   * @param options Optional request settings.
+   *
+   * @throws {Leap0Error} If deleting the sandbox fails.
    */
   async delete(options?: { timeout?: number }): Promise<void> {
     await this.client.sandboxes.delete(this.id, options);
@@ -191,12 +212,9 @@ export class Sandbox implements SandboxData {
   /**
    * Returns the public invoke URL for the sandbox.
    *
-   * Args:
-   *   path: Route path to append.
-   *   port: Optional forwarded port.
-   *
-   * Returns:
-   *   The public HTTPS URL.
+   * @param path Route path to append.
+   * @param port Optional forwarded port.
+   * @returns The public HTTPS URL.
    */
   invokeUrl(path = "/", port?: number): string {
     return this.client.sandboxes.invokeUrl(this.id, path, port);
@@ -205,12 +223,9 @@ export class Sandbox implements SandboxData {
   /**
    * Returns the public websocket URL for the sandbox.
    *
-   * Args:
-   *   path: Route path to append.
-   *   port: Optional forwarded port.
-   *
-   * Returns:
-   *   The public websocket URL.
+   * @param path Route path to append.
+   * @param port Optional forwarded port.
+   * @returns The public websocket URL.
    */
   websocketUrl(path = "/", port?: number): string {
     return this.client.sandboxes.websocketUrl(this.id, path, port);

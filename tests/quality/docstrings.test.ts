@@ -66,13 +66,13 @@ function iterFailures(): string[] {
         }
         if (strictFiles.has(relative)) {
           const params = ts.isFunctionDeclaration(node) ? node.parameters.length : 0;
-          if (params > 0 && !doc.includes("Args:"))
+          if (params > 0 && !doc.includes("@param"))
             failures.push(`${relative}:${node.name.text} missing Args`);
           if (
             ts.isFunctionDeclaration(node) &&
             node.type &&
             node.type.kind !== ts.SyntaxKind.VoidKeyword &&
-            !doc.includes("Returns:")
+            !doc.includes("@returns")
           ) {
             failures.push(`${relative}:${node.name.text} missing Returns`);
           }
@@ -93,15 +93,15 @@ function iterFailures(): string[] {
               (parameter) =>
                 ts.isIdentifier(parameter.name) && !["self", "cls"].includes(parameter.name.text),
             ).length;
-            if (paramCount > 0 && !memberDoc.includes("Args:"))
+            if (paramCount > 0 && !memberDoc.includes("@param"))
               failures.push(`${relative}:${node.name.text}.${methodName} missing Args`);
             const returnsVoid = !member.type || member.type.kind === ts.SyntaxKind.VoidKeyword;
             const returnsPromiseVoid = member.type?.getText(sourceFile) === "Promise<void>";
             if (
               !returnsVoid &&
               !returnsPromiseVoid &&
-              !memberDoc.includes("Returns:") &&
-              !memberDoc.includes("Yields:")
+              !memberDoc.includes("@returns") &&
+              !memberDoc.includes("@yields")
             ) {
               failures.push(`${relative}:${node.name.text}.${methodName} missing Returns/Yields`);
             }

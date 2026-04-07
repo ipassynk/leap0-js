@@ -51,9 +51,13 @@ function injectOtelEnv(
   return merged;
 }
 
-export type SandboxFactory<T> = (data: SandboxData) => T;
+type SandboxFactory<T> = (data: SandboxData) => T;
 
-/** Creates, fetches, pauses, and deletes sandboxes. */
+/**
+ * Creates, fetches, pauses, and deletes sandboxes.
+ *
+ * @throws {Leap0Error} If request validation, API calls, or response validation fail.
+ */
 export class SandboxesClient<T = SandboxData> {
   private readonly sandboxFactory?: SandboxFactory<T>;
 
@@ -70,7 +74,22 @@ export class SandboxesClient<T = SandboxData> {
     return (this.sandboxFactory ? this.sandboxFactory(data) : data) as T;
   }
 
-  /** Creates a sandbox from a template and resource config. */
+  /**
+   * Creates a sandbox from a template and resource config.
+   *
+   * @param params Sandbox creation parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The created sandbox resource.
+   * @throws {Leap0Error} If params are invalid, local OTEL env is missing, or sandbox creation fails.
+   *
+   * @example
+   * ```ts
+   * const sandbox = await client.sandboxes.create({
+   *   templateName: "base",
+   *   timeoutMin: 30,
+   * });
+   * ```
+   */
   async create(params: CreateSandboxParams = {}, options: RequestOptions = {}): Promise<T> {
     const parsedParams = createSandboxRuntimeParamsSchema.safeParse(params);
     if (!parsedParams.success) {
@@ -99,7 +118,13 @@ export class SandboxesClient<T = SandboxData> {
     });
   }
 
-  /** Pauses a running sandbox. */
+  /**
+   * Pauses a running sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The updated sandbox resource.
+   */
   async pause(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T> {
     return withErrorPrefix("Failed to pause sandbox: ", async () => {
       const data = await this.transport.requestJson<unknown>(
@@ -111,7 +136,13 @@ export class SandboxesClient<T = SandboxData> {
     });
   }
 
-  /** Fetches a sandbox by ID. */
+  /**
+   * Fetches a sandbox by ID.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The current sandbox resource.
+   */
   async get(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T> {
     return withErrorPrefix("Failed to get sandbox: ", async () => {
       const data = await this.transport.requestJson<unknown>(
@@ -123,19 +154,38 @@ export class SandboxesClient<T = SandboxData> {
     });
   }
 
-  /** Deletes a sandbox by ID. */
+  /**
+   * Deletes a sandbox by ID.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async delete(sandbox: SandboxRef, options: RequestOptions = {}): Promise<void> {
     await withErrorPrefix("Failed to delete sandbox: ", () =>
       this.transport.request(`/v1/sandbox/${sandboxIdOf(sandbox)}/`, { method: "DELETE" }, options),
     );
   }
 
-  /** Builds the public invoke URL for a sandbox. */
+  /**
+   * Builds the public invoke URL for a sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Route path to append to the sandbox base URL.
+   * @param port Optional forwarded port.
+   * @returns The public HTTPS URL for the sandbox.
+   */
   invokeUrl(sandbox: SandboxRef, path = "/", port?: number): string {
     return `${sandboxBaseUrl(sandboxIdOf(sandbox), this.transport.sandboxDomain, port)}${ensureLeadingSlash(path)}`;
   }
 
-  /** Builds the public websocket URL for a sandbox. */
+  /**
+   * Builds the public websocket URL for a sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Route path to append to the sandbox base URL.
+   * @param port Optional forwarded port.
+   * @returns The public websocket URL for the sandbox.
+   */
   websocketUrl(sandbox: SandboxRef, path = "/", port?: number): string {
     return websocketUrlFromHttp(this.invokeUrl(sandbox, path, port));
   }

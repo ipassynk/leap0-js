@@ -7,6 +7,7 @@ export const desktopDisplayInfoSchema = z
     height: z.number().int(),
   })
   .catchall(z.unknown());
+/** Display geometry and identifier for the desktop service. */
 export type DesktopDisplayInfo = z.infer<typeof desktopDisplayInfoSchema>;
 
 export const desktopPointerPositionSchema = z
@@ -15,12 +16,14 @@ export const desktopPointerPositionSchema = z
     y: z.number().int(),
   })
   .catchall(z.unknown());
+/** Current desktop pointer coordinates. */
 export type DesktopPointerPosition = z.infer<typeof desktopPointerPositionSchema>;
 
 export const desktopSetScreenParamsSchema = z.object({
   width: z.number().int().min(320).max(7680),
   height: z.number().int().min(320).max(4320),
 });
+/** Screen resize parameters for the desktop service. */
 export type DesktopSetScreenParams = z.infer<typeof desktopSetScreenParamsSchema>;
 
 export const desktopScreenshotParamsSchema = z
@@ -38,6 +41,7 @@ export const desktopScreenshotParamsSchema = z
   .refine((params) => (params.x === undefined) === (params.y === undefined), {
     message: "x and y must be provided together",
   });
+/** Screenshot query parameters for full-screen or cropped captures. */
 export type DesktopScreenshotParams = z.infer<typeof desktopScreenshotParamsSchema>;
 
 export const desktopScreenshotRegionParamsSchema = z.object({
@@ -48,6 +52,7 @@ export const desktopScreenshotRegionParamsSchema = z.object({
   format: z.enum(["png", "jpg", "jpeg"]).optional(),
   quality: z.number().int().min(1).max(100).optional(),
 });
+/** Required region parameters for region screenshot capture. */
 export type DesktopScreenshotRegionParams = z.infer<typeof desktopScreenshotRegionParamsSchema>;
 
 export const desktopClickParamsSchema = z
@@ -59,6 +64,7 @@ export const desktopClickParamsSchema = z
   .refine((params) => (params.x === undefined) === (params.y === undefined), {
     message: "x and y must be provided together or both omitted",
   });
+/** Mouse click parameters for the desktop service. */
 export type DesktopClickParams = z.infer<typeof desktopClickParamsSchema>;
 
 export const desktopDragParamsSchema = z.object({
@@ -68,12 +74,14 @@ export const desktopDragParamsSchema = z.object({
   toY: z.number().int().min(0),
   button: z.number().int().min(1).max(3).optional(),
 });
+/** Mouse drag parameters for the desktop service. */
 export type DesktopDragParams = z.infer<typeof desktopDragParamsSchema>;
 
 export const desktopScrollParamsSchema = z.object({
   direction: z.enum(["up", "down", "left", "right"]),
   amount: z.number().int().min(1).max(100).optional(),
 });
+/** Scroll gesture parameters for the desktop service. */
 export type DesktopScrollParams = z.infer<typeof desktopScrollParamsSchema>;
 
 export const desktopWindowSchema = z
@@ -91,6 +99,7 @@ export const desktopWindowSchema = z
     focused: z.boolean().optional(),
   })
   .catchall(z.unknown());
+/** Window metadata returned by the desktop service. */
 export type DesktopWindow = z.infer<typeof desktopWindowSchema>;
 
 export const desktopHealthSchema = z
@@ -98,6 +107,7 @@ export const desktopHealthSchema = z
     ok: z.boolean(),
   })
   .catchall(z.unknown());
+/** Health response returned by the desktop service. */
 export type DesktopHealth = z.infer<typeof desktopHealthSchema>;
 
 export const desktopRecordingSummarySchema = z
@@ -111,6 +121,7 @@ export const desktopRecordingSummarySchema = z
     active: z.boolean().optional(),
   })
   .catchall(z.unknown());
+/** Summary metadata for a desktop recording. */
 export type DesktopRecordingSummary = z.infer<typeof desktopRecordingSummarySchema>;
 
 export const desktopRecordingStatusSchema = z
@@ -126,6 +137,7 @@ export const desktopRecordingStatusSchema = z
     resolution: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Current recording state for the desktop service. */
 export type DesktopRecordingStatus = z.infer<typeof desktopRecordingStatusSchema>;
 
 export const desktopProcessStatusSchema = z
@@ -136,6 +148,7 @@ export const desktopProcessStatusSchema = z
     stdoutLog: z.string(),
     stderrLog: z.string(),
   });
+/** Status for a single desktop-managed process. */
 export type DesktopProcessStatus = z.infer<typeof desktopProcessStatusSchema>;
 
 export const desktopProcessStatusListSchema = z
@@ -145,9 +158,11 @@ export const desktopProcessStatusListSchema = z
     running: z.number().int(),
     total: z.number().int(),
   });
+/** Aggregate desktop process status across tracked services. */
 export type DesktopProcessStatusList = z.infer<typeof desktopProcessStatusListSchema>;
 
 export const desktopStatusStreamEventSchema = desktopProcessStatusListSchema;
+/** Event yielded by the desktop status stream. */
 export type DesktopStatusStreamEvent = z.infer<typeof desktopStatusStreamEventSchema>;
 
 export const desktopProcessLogsSchema = z
@@ -156,6 +171,7 @@ export const desktopProcessLogsSchema = z
     logs: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Log payload returned for a desktop-managed process. */
 export type DesktopProcessLogs = z.infer<typeof desktopProcessLogsSchema>;
 
 export const desktopProcessErrorsSchema = z
@@ -164,6 +180,7 @@ export const desktopProcessErrorsSchema = z
     errors: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Error-log payload returned for a desktop-managed process. */
 export type DesktopProcessErrors = z.infer<typeof desktopProcessErrorsSchema>;
 
 export const desktopProcessRestartSchema = z
@@ -172,4 +189,5 @@ export const desktopProcessRestartSchema = z
     status: desktopProcessStatusSchema.optional(),
   })
   .catchall(z.unknown());
+/** Result returned when restarting a desktop-managed process. */
 export type DesktopProcessRestart = z.infer<typeof desktopProcessRestartSchema>;

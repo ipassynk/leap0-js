@@ -13,6 +13,7 @@ export const leap0ConfigInputSchema = z.object({
   bearer: z.boolean().optional(),
   sdkOtelEnabled: z.boolean().optional(),
 });
+/** User-provided configuration accepted by `Leap0Client`. */
 export type Leap0ConfigInput = z.infer<typeof leap0ConfigInputSchema>;
 
 export const leap0ConfigResolvedSchema = z.object({
@@ -24,4 +25,5 @@ export const leap0ConfigResolvedSchema = z.object({
   bearer: z.boolean(),
   sdkOtelEnabled: z.boolean(),
 });
+/** Fully resolved SDK configuration after env/default expansion. */
 export type Leap0ConfigResolved = z.infer<typeof leap0ConfigResolvedSchema>;

@@ -17,8 +17,7 @@ let meterProviderInstance: MeterProvider | undefined;
 /**
  * Returns the shared OpenTelemetry tracer for the SDK.
  *
- * Returns:
- *   The tracer used for SDK spans.
+ * @returns The tracer used for SDK spans.
  */
 export function getTracer() {
   return trace.getTracer(TRACER_NAME, SDK_VERSION);
@@ -52,8 +51,7 @@ export function initOtel(): void {
 /**
  * Shuts down OpenTelemetry providers and resets state so they can be re-initialized.
  *
- * Returns:
- *   A promise that resolves once providers are flushed and shut down.
+ * @returns A promise that resolves once providers are flushed and shut down.
  */
 export async function shutdownOtel(): Promise<void> {
   const tracerProvider = tracerProviderInstance;
@@ -74,14 +72,11 @@ export async function shutdownOtel(): Promise<void> {
 /**
  * Executes an operation inside an OpenTelemetry span when SDK telemetry is enabled.
  *
- * Args:
- *   config: Resolved SDK configuration.
- *   name: Span name.
- *   attributes: Span attributes.
- *   fn: Operation to execute.
- *
- * Returns:
- *   The operation result.
+ * @param config Resolved SDK configuration.
+ * @param name Span name.
+ * @param attributes Span attributes.
+ * @param fn Operation to execute.
+ * @returns The operation result.
  */
 export async function withSpan<T>(
   config: Leap0ConfigResolved,

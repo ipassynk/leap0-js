@@ -35,11 +35,8 @@ export class Leap0Transport {
   /**
    * Builds request headers with auth and SDK metadata.
    *
-   * Args:
-   *   extra: Additional headers to merge into the request.
-   *
-   * Returns:
-   *   The final header set.
+   * @param extra Additional headers to merge into the request.
+   * @returns The final header set.
    */
   private headers(extra?: HeadersInit): Headers {
     const headers = new Headers(extra);
@@ -56,8 +53,7 @@ export class Leap0Transport {
   /**
    * Marks the transport as closed.
    *
-   * Returns:
-   *   A promise that resolves once the transport is closed.
+   * @returns A promise that resolves once the transport is closed.
    */
   async close(): Promise<void> {
     this.closed = true;
@@ -70,13 +66,10 @@ export class Leap0Transport {
   /**
    * Sends a raw HTTP request to the Leap0 control plane.
    *
-   * Args:
-   *   path: API path relative to the configured base URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The raw fetch response.
+   * @param path API path relative to the configured base URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The raw fetch response.
    */
   async request(
     path: string,
@@ -94,13 +87,10 @@ export class Leap0Transport {
   /**
    * Sends a raw HTTP request to an absolute URL.
    *
-   * Args:
-   *   url: Fully-qualified request URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The raw fetch response.
+   * @param url Fully-qualified request URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The raw fetch response.
    */
   async requestUrl(
     url: string,
@@ -177,13 +167,10 @@ export class Leap0Transport {
   /**
    * Sends a JSON request and parses the JSON response body.
    *
-   * Args:
-   *   path: API path relative to the configured base URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The parsed JSON response, or undefined for 204 No Content.
+   * @param path API path relative to the configured base URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The parsed JSON response, or undefined for 204 No Content.
    */
   async requestJson<T>(
     path: string,
@@ -204,13 +191,10 @@ export class Leap0Transport {
   /**
    * Sends a JSON request to an absolute URL and parses the JSON response body.
    *
-   * Args:
-   *   url: Fully-qualified request URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The parsed JSON response, or undefined for 204 No Content.
+   * @param url Fully-qualified request URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The parsed JSON response, or undefined for 204 No Content.
    */
   async requestJsonUrl<T>(
     url: string,
@@ -231,13 +215,10 @@ export class Leap0Transport {
   /**
    * Sends a request and returns the response body as text.
    *
-   * Args:
-   *   path: API path relative to the configured base URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The response body text.
+   * @param path API path relative to the configured base URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The response body text.
    */
   async requestText(
     path: string,
@@ -250,13 +231,10 @@ export class Leap0Transport {
   /**
    * Sends a request and returns the response body as bytes.
    *
-   * Args:
-   *   path: API path relative to the configured base URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The response body bytes.
+   * @param path API path relative to the configured base URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The response body bytes.
    */
   async requestBytes(
     path: string,
@@ -269,13 +247,10 @@ export class Leap0Transport {
   /**
    * Sends a request to an absolute URL and returns the response body as bytes.
    *
-   * Args:
-   *   url: Fully-qualified request URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Returns:
-   *   The response body bytes.
+   * @param url Fully-qualified request URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @returns The response body bytes.
    */
   async requestBytesUrl(
     url: string,
@@ -288,13 +263,10 @@ export class Leap0Transport {
   /**
    * Parses a server-sent event stream into JSON payloads.
    *
-   * Args:
-   *   path: API path relative to the configured base URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Yields:
-   *   Parsed JSON event payloads.
+   * @param path API path relative to the configured base URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @yields Parsed JSON event payloads.
    */
   async *streamJson(
     path: string,
@@ -308,13 +280,10 @@ export class Leap0Transport {
   /**
    * Parses a server-sent event stream from an absolute URL into JSON payloads.
    *
-   * Args:
-   *   url: Fully-qualified request URL.
-   *   init: Fetch request options.
-   *   options: Leap0 request options such as timeout and query params.
-   *
-   * Yields:
-   *   Parsed JSON event payloads.
+   * @param url Fully-qualified request URL.
+   * @param init Fetch request options.
+   * @param options Leap0 request options such as timeout and query params.
+   * @yields Parsed JSON event payloads.
    */
   async *streamJsonUrl(
     url: string,
@@ -407,11 +376,8 @@ export class Leap0Transport {
 /**
  * Serializes a value into a JSON request body.
  *
- * Args:
- *   value: Value to serialize.
- *
- * Returns:
- *   A JSON string body or null.
+ * @param value Value to serialize.
+ * @returns A JSON string body or null.
  */
 export function jsonBody(value: unknown): BodyLike {
   return value == null ? null : JSON.stringify(value);

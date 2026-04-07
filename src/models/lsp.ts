@@ -5,6 +5,7 @@ export const lspResponseSchema = z
     success: z.boolean(),
   })
   .catchall(z.unknown());
+/** Success response returned by simple LSP control endpoints. */
 export type LspResponse = z.infer<typeof lspResponseSchema>;
 
 export const lspJsonRpcErrorSchema = z.object({
@@ -12,6 +13,7 @@ export const lspJsonRpcErrorSchema = z.object({
   message: z.string(),
   data: z.unknown().optional(),
 });
+/** JSON-RPC error payload returned by a language server. */
 export type LspJsonRpcError = z.infer<typeof lspJsonRpcErrorSchema>;
 
 export const lspJsonRpcResponseSchema = z
@@ -24,6 +26,7 @@ export const lspJsonRpcResponseSchema = z
   .refine((value) => (value.result === undefined) !== (value.error === undefined), {
     message: "Exactly one of result or error must be present",
   });
+/** JSON-RPC response returned by LSP query endpoints. */
 export type LspJsonRpcResponse<T = unknown> = Omit<
   z.infer<typeof lspJsonRpcResponseSchema>,
   "result"

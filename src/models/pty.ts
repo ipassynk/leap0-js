@@ -12,6 +12,7 @@ export const ptySessionSchema = z
     lazyStart: z.boolean(),
   })
   .catchall(z.unknown());
+/** Interactive PTY session metadata. */
 export type PtySession = z.infer<typeof ptySessionSchema>;
 
 export const createPtySessionParamsSchema = z.object({
@@ -22,4 +23,5 @@ export const createPtySessionParamsSchema = z.object({
   envs: z.record(z.string(), z.string()).optional(),
   lazyStart: z.boolean().optional(),
 });
+/** Parameters accepted when creating a PTY session. */
 export type CreatePtySessionParams = z.infer<typeof createPtySessionParamsSchema>;

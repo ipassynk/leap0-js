@@ -44,7 +44,11 @@ function compact(obj: JsonObject): JsonObject {
   return result;
 }
 
-/** Performs filesystem operations inside a sandbox. */
+/**
+ * Performs filesystem operations inside a sandbox.
+ *
+ * @throws {Leap0Error} If API calls or response validation fail.
+ */
 export class FilesystemClient {
   constructor(private readonly transport: Leap0Transport) {}
 
@@ -52,7 +56,15 @@ export class FilesystemClient {
     return `/v1/sandbox/${sandboxIdOf(sandbox)}/filesystem/${endpoint}`;
   }
 
-  /** Lists directory contents. */
+  /**
+   * Lists directory contents, optionally recursively.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Directory path to list.
+   * @param params Listing options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The directory listing result.
+   */
   async ls(
     sandbox: SandboxRef,
     path: string,
@@ -70,7 +82,14 @@ export class FilesystemClient {
     return normalize(lsResultSchema, data);
   }
 
-  /** Fetches metadata for a path. */
+  /**
+   * Fetches metadata for a path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Filesystem path to stat.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The path metadata.
+   */
   async stat(sandbox: SandboxRef, path: string, options: RequestOptions = {}): Promise<FileInfo> {
     const data = await this.transport.requestJson<FileInfo>(
       this.fsPath(sandbox, "stat"),
@@ -80,7 +99,14 @@ export class FilesystemClient {
     return normalize(fileInfoSchema, data);
   }
 
-  /** Creates a directory. Set recursive to create parent directories. */
+  /**
+   * Creates a directory. Set `recursive` to create parent directories.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Directory path to create.
+   * @param params Directory creation options.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async mkdir(
     sandbox: SandboxRef,
     path: string,
@@ -99,7 +125,15 @@ export class FilesystemClient {
     );
   }
 
-  /** Writes raw bytes to a single file path. */
+  /**
+   * Writes raw bytes to a single file path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File path to write.
+   * @param content File bytes to write.
+   * @param params File write options.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async writeBytes(
     sandbox: SandboxRef,
     path: string,
@@ -120,7 +154,15 @@ export class FilesystemClient {
     );
   }
 
-  /** Writes text to a single file path. */
+  /**
+   * Writes UTF-8 text to a single file path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File path to write.
+   * @param content UTF-8 text content to write.
+   * @param params File write options.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async writeFile(
     sandbox: SandboxRef,
     path: string,
@@ -131,7 +173,13 @@ export class FilesystemClient {
     await this.writeBytes(sandbox, path, new TextEncoder().encode(content), params, options);
   }
 
-  /** Writes multiple files in a single request using multipart upload. */
+  /**
+   * Writes multiple files in a single request using multipart upload.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param files Files keyed by destination path.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async writeFilesBytes(
     sandbox: SandboxRef,
     files: Record<string, Uint8Array>,
@@ -148,7 +196,13 @@ export class FilesystemClient {
     );
   }
 
-  /** Writes multiple text files in a single request. */
+  /**
+   * Writes multiple UTF-8 text files in a single request.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param files Files keyed by destination path.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async writeFiles(
     sandbox: SandboxRef,
     files: Record<string, string>,
@@ -162,7 +216,17 @@ export class FilesystemClient {
     await this.writeFilesBytes(sandbox, bytesFiles, options);
   }
 
-  /** Reads a single file and returns its raw bytes. */
+  /**
+   * Reads a single file and returns its raw bytes.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File path to read.
+   * @param params Read options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The file contents as bytes.
+   * @throws {Error} If both `head` and `tail` are provided.
+   * @throws {Leap0Error} If the read request fails.
+   */
   async readBytes(
     sandbox: SandboxRef,
     path: string,
@@ -177,7 +241,22 @@ export class FilesystemClient {
     );
   }
 
-  /** Reads a single file and returns its content decoded as text. */
+  /**
+   * Reads a single file and returns its content decoded as text.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File path to read.
+   * @param params Read options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The file contents decoded as text.
+   * @throws {Error} If both `head` and `tail` are provided.
+   * @throws {Leap0Error} If the read request fails.
+   *
+   * @example
+   * ```ts
+   * const readme = await sandbox.filesystem.readFile("/workspace/README.md");
+   * ```
+   */
   async readFile(
     sandbox: SandboxRef,
     path: string,
@@ -192,7 +271,16 @@ export class FilesystemClient {
     );
   }
 
-  /** Reads multiple files and returns raw bytes keyed by path. */
+  /**
+   * Reads multiple files and returns raw bytes keyed by path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param paths File paths to read.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns File contents keyed by path.
+   * @throws {Error} If the multipart response is malformed.
+   * @throws {Leap0Error} If the read request fails.
+   */
   async readFilesBytes(
     sandbox: SandboxRef,
     paths: string[],
@@ -218,7 +306,14 @@ export class FilesystemClient {
     return result;
   }
 
-  /** Reads multiple files and returns decoded text keyed by path. */
+  /**
+   * Reads multiple files and returns decoded text keyed by path.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param paths File paths to read.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Decoded file contents keyed by path.
+   */
   async readFiles(
     sandbox: SandboxRef,
     paths: string[],
@@ -233,7 +328,14 @@ export class FilesystemClient {
     return result;
   }
 
-  /** Deletes a file or directory. Set recursive for non-empty directories. */
+  /**
+   * Deletes a file or directory. Set `recursive` for non-empty directories.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File or directory path to delete.
+   * @param recursive Whether to delete directories recursively.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async delete(
     sandbox: SandboxRef,
     path: string,
@@ -247,7 +349,15 @@ export class FilesystemClient {
     );
   }
 
-  /** Sets file mode and optionally changes owner and group. */
+  /**
+   * Sets file mode and optionally changes owner and group.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File or directory path to update.
+   * @param params Permission update parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @throws {Leap0Error} If params are invalid or the request fails.
+   */
   async setPermissions(
     sandbox: SandboxRef,
     path: string,
@@ -267,7 +377,16 @@ export class FilesystemClient {
     );
   }
 
-  /** Finds file paths matching a glob pattern. */
+  /**
+   * Finds file paths matching a glob pattern.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Base directory to search.
+   * @param pattern Glob pattern to match.
+   * @param params Glob options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Matching file paths.
+   */
   async glob(
     sandbox: SandboxRef,
     path: string,
@@ -283,7 +402,16 @@ export class FilesystemClient {
     return z.object({ items: z.array(z.string()) }).parse(data).items;
   }
 
-  /** Searches for a text pattern across files in a directory. */
+  /**
+   * Searches for a text pattern across files in a directory.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Base directory to search.
+   * @param pattern Text or regex pattern to search for.
+   * @param params Grep options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Matching search results.
+   */
   async grep(
     sandbox: SandboxRef,
     path: string,
@@ -304,7 +432,15 @@ export class FilesystemClient {
     return normalize(z.object({ items: z.array(searchMatchSchema) }), data).items;
   }
 
-  /** Applies one or more find-and-replace edits to a single file. */
+  /**
+   * Applies one or more find-and-replace edits to a single file.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File path to edit.
+   * @param edits Edit operations to apply.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The single-file edit result.
+   */
   async editFile(
     sandbox: SandboxRef,
     path: string,
@@ -319,7 +455,14 @@ export class FilesystemClient {
     return normalize(editFileResultSchema, data);
   }
 
-  /** Replaces text across multiple files at once. */
+  /**
+   * Replaces text across multiple files at once.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Multi-file edit parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The multi-file edit result.
+   */
   async editFiles(
     sandbox: SandboxRef,
     params: { paths: string[]; find: string; replace?: string },
@@ -341,7 +484,15 @@ export class FilesystemClient {
     return normalize(editFilesResultSchema, data);
   }
 
-  /** Moves or renames a file or directory. */
+  /**
+   * Moves or renames a file or directory.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param srcPath Source path.
+   * @param dstPath Destination path.
+   * @param overwrite Whether to overwrite an existing destination.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async move(
     sandbox: SandboxRef,
     srcPath: string,
@@ -356,7 +507,15 @@ export class FilesystemClient {
     );
   }
 
-  /** Copies a file or directory. */
+  /**
+   * Copies a file or directory.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param srcPath Source path.
+   * @param dstPath Destination path.
+   * @param params Copy options.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async copy(
     sandbox: SandboxRef,
     srcPath: string,
@@ -381,7 +540,14 @@ export class FilesystemClient {
     );
   }
 
-  /** Checks whether a path exists in the sandbox. */
+  /**
+   * Checks whether a path exists in the sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path File or directory path to check.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns Whether the path exists.
+   */
   async exists(sandbox: SandboxRef, path: string, options: RequestOptions = {}): Promise<boolean> {
     const data = await this.transport.requestJson(
       this.fsPath(sandbox, "exists"),
@@ -391,7 +557,15 @@ export class FilesystemClient {
     return z.object({ exists: z.boolean() }).parse(data).exists;
   }
 
-  /** Gets a recursive directory tree. */
+  /**
+   * Gets a recursive directory tree.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param path Root path for the tree.
+   * @param params Tree options.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The recursive tree result.
+   */
   async tree(
     sandbox: SandboxRef,
     path: string,

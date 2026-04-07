@@ -16,11 +16,13 @@ export const snapshotDataSchema = z
     createdAt: z.string(),
   })
   .catchall(z.unknown());
+/** Snapshot resource returned by the control plane API. */
 export type SnapshotData = z.infer<typeof snapshotDataSchema>;
 
 export const createSnapshotParamsSchema = z.object({
   name: snapshotNameSchema.optional(),
 });
+/** Parameters accepted when creating or naming a snapshot. */
 export type CreateSnapshotParams = z.infer<typeof createSnapshotParamsSchema>;
 
 export const resumeSnapshotParamsSchema = z.object({
@@ -29,4 +31,5 @@ export const resumeSnapshotParamsSchema = z.object({
   timeoutMin: z.number().int().min(1).max(480).optional(),
   networkPolicy: networkPolicySchema.optional(),
 });
+/** Parameters accepted when resuming a snapshot into a new sandbox. */
 export type ResumeSnapshotParams = z.infer<typeof resumeSnapshotParamsSchema>;
