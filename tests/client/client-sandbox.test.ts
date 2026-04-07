@@ -173,7 +173,7 @@ test("client and sandbox helpers stay strongly typed", () => {
   >();
 
   expectTypeOf<Sandbox["process"]["execute"]>().parameters.toEqualTypeOf<
-    [params: { command: string; cwd?: string; timeout?: number }, options?: RequestOptions]
+    [params: { command: string; cwd?: string; timeout?: number; env?: Record<string, string> }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
     [accessId: string, password: string, options?: RequestOptions]
