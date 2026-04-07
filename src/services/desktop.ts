@@ -48,7 +48,11 @@ import { asRecord } from "@/services/shared.js";
 
 const desktopOkResponseSchema = z.object({ ok: z.boolean() });
 
-/** Drives the desktop sandbox APIs for browser and GUI automation. */
+/**
+ * Drives the desktop sandbox APIs for browser and GUI automation.
+ *
+ * @throws {Leap0Error} If API calls, stream decoding, or response validation fail.
+ */
 export class DesktopClient {
   constructor(private readonly transport: Leap0Transport) {}
 
@@ -56,6 +60,7 @@ export class DesktopClient {
     return `${sandboxBaseUrl(sandboxIdOf(sandbox), this.transport.sandboxDomain)}${path}`;
   }
 
+  /** Returns the base desktop URL for opening the remote UI in a browser. */
   desktopUrl(sandbox: SandboxRef): string {
     return `${sandboxBaseUrl(sandboxIdOf(sandbox), this.transport.sandboxDomain)}/`;
   }
@@ -73,6 +78,7 @@ export class DesktopClient {
     );
   }
 
+  /** Returns display metadata for the desktop session. */
   async displayInfo(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo> {
     return this.requestJson(
       sandbox,
@@ -82,6 +88,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns the currently active desktop screen geometry. */
   async screen(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo> {
     return this.requestJson(
       sandbox,
@@ -91,6 +98,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Resizes the desktop screen to the requested dimensions. */
   async resizeScreen(
     sandbox: SandboxRef,
     payload: DesktopSetScreenParams,
@@ -105,6 +113,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Lists windows visible on the desktop. */
   async windows(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopWindow[]> {
     return this.requestJson(
       sandbox,
@@ -114,6 +123,7 @@ export class DesktopClient {
       options,
     ).then((r) => r.items);
   }
+  /** Captures a screenshot and returns raw image bytes. */
   async screenshot(
     sandbox: SandboxRef,
     params: DesktopScreenshotParams = {},
@@ -126,6 +136,7 @@ export class DesktopClient {
       { ...options, query: parsed },
     );
   }
+  /** Captures a screenshot of a required rectangular region. */
   async screenshotRegion(
     sandbox: SandboxRef,
     payload: DesktopScreenshotRegionParams,
@@ -138,6 +149,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns the current pointer position. */
   async pointerPosition(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -150,6 +162,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Moves the desktop pointer to a coordinate. */
   async movePointer(
     sandbox: SandboxRef,
     x: number,
@@ -164,6 +177,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Clicks the current pointer position or an explicit coordinate. */
   async click(
     sandbox: SandboxRef,
     params: DesktopClickParams = {},
@@ -178,6 +192,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Drags the pointer from one coordinate to another. */
   async drag(
     sandbox: SandboxRef,
     payload: DesktopDragParams,
@@ -201,6 +216,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Scrolls the desktop in the requested direction. */
   async scroll(
     sandbox: SandboxRef,
     payload: DesktopScrollParams,
@@ -215,6 +231,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Types text into the active desktop input target. */
   async typeText(sandbox: SandboxRef, text: string, options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/type"),
@@ -223,6 +240,7 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
+  /** Sends a single key press to the desktop. */
   async pressKey(sandbox: SandboxRef, key: string, options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/press"),
@@ -231,6 +249,7 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
+  /** Sends a key chord such as `Ctrl+C` or `Cmd+Shift+P`. */
   async hotkey(sandbox: SandboxRef, keys: string[], options?: RequestOptions): Promise<boolean> {
     const data = await this.transport.requestJsonUrl(
       this.requestUrl(sandbox, "/api/input/hotkey"),
@@ -239,6 +258,7 @@ export class DesktopClient {
     );
     return normalize(desktopOkResponseSchema, data).ok;
   }
+  /** Returns current desktop recording state. */
   async recordingStatus(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -251,6 +271,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Starts desktop recording. */
   async startRecording(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -263,6 +284,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Stops desktop recording. */
   async stopRecording(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -275,6 +297,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Lists recorded desktop sessions. */
   async recordings(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -287,6 +310,7 @@ export class DesktopClient {
       options,
     ).then((r) => r.items);
   }
+  /** Fetches metadata for a single recording. */
   async getRecording(
     sandbox: SandboxRef,
     id: string,
@@ -300,6 +324,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Downloads a recording and returns raw file bytes. */
   async downloadRecording(
     sandbox: SandboxRef,
     id: string,
@@ -311,6 +336,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Deletes a recording by ID. */
   async deleteRecording(sandbox: SandboxRef, id: string, options?: RequestOptions): Promise<void> {
     await this.transport.requestUrl(
       this.requestUrl(sandbox, `/api/recordings/${encodeURIComponent(id)}`),
@@ -318,6 +344,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns desktop service health, accepting both healthy and degraded status codes. */
   async health(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopHealth> {
     return this.requestJson(
       sandbox,
@@ -327,6 +354,7 @@ export class DesktopClient {
       { ...options, expectedStatus: [200, 503] },
     );
   }
+  /** Returns aggregate status for desktop-managed processes. */
   async processStatus(
     sandbox: SandboxRef,
     options?: RequestOptions,
@@ -339,6 +367,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns status for a named desktop-managed process. */
   async getProcess(
     sandbox: SandboxRef,
     name: string,
@@ -352,6 +381,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Restarts a named desktop-managed process. */
   async restartProcess(
     sandbox: SandboxRef,
     name: string,
@@ -365,6 +395,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns logs for a named desktop-managed process. */
   async processLogs(
     sandbox: SandboxRef,
     name: string,
@@ -378,6 +409,7 @@ export class DesktopClient {
       options,
     );
   }
+  /** Returns error logs for a named desktop-managed process. */
   async processErrors(
     sandbox: SandboxRef,
     name: string,
@@ -392,6 +424,11 @@ export class DesktopClient {
     );
   }
 
+  /**
+   * Streams desktop process status updates.
+   *
+   * @throws {Leap0Error} If the stream returns malformed events or reports an error envelope.
+   */
   async *statusStream(
     sandbox: SandboxRef,
     options: RequestOptions = {},
@@ -412,6 +449,16 @@ export class DesktopClient {
     }
   }
 
+  /**
+   * Waits until the desktop reports a running state or all tracked processes are up.
+   *
+   * @throws {Leap0Error} If the desktop never becomes ready or a non-retryable error occurs.
+   *
+   * @example
+   * ```ts
+   * await sandbox.desktop.waitUntilReady();
+   * ```
+   */
   async waitUntilReady(sandbox: SandboxRef, timeout = 60): Promise<void> {
     const deadline = Date.now() + timeout * 1000;
     let lastError: unknown;

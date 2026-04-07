@@ -14,11 +14,13 @@ export const fileInfoSchema = z
     linkTarget: z.string().optional(),
   })
   .catchall(z.unknown());
+/** File or directory metadata returned by filesystem operations. */
 export type FileInfo = z.infer<typeof fileInfoSchema>;
 
 export const lsResultSchema = z.object({
   items: z.array(fileInfoSchema),
 });
+/** Directory listing result containing filesystem entries. */
 export type LsResult = z.infer<typeof lsResultSchema>;
 
 export const searchMatchSchema = z
@@ -28,8 +30,10 @@ export const searchMatchSchema = z
     content: z.string(),
   })
   .catchall(z.unknown());
+/** Single grep-style text match returned from a sandbox search. */
 export type SearchMatch = z.infer<typeof searchMatchSchema>;
 
+/** Recursive directory tree entry. */
 export type TreeEntry = {
   name: string;
   type: "file" | "directory";
@@ -47,12 +51,14 @@ export const treeEntrySchema: z.ZodType<TreeEntry> = z.lazy(() =>
 export const treeResultSchema = z.object({
   items: z.array(treeEntrySchema),
 });
+/** Recursive directory tree result. */
 export type TreeResult = z.infer<typeof treeResultSchema>;
 
 export const fileEditSchema = z.object({
   find: z.string(),
   replace: z.string().nullable().optional(),
 });
+/** Find/replace edit applied to a single file. */
 export type FileEdit = z.infer<typeof fileEditSchema>;
 
 export const editFileResultSchema = z
@@ -61,6 +67,7 @@ export const editFileResultSchema = z
     replacements: z.number(),
   })
   .catchall(z.unknown());
+/** Result of editing a single file, including diff output. */
 export type EditFileResult = z.infer<typeof editFileResultSchema>;
 
 export const editResultSchema = z
@@ -70,11 +77,13 @@ export const editResultSchema = z
     error: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Per-file outcome from a bulk edit operation. */
 export type EditResult = z.infer<typeof editResultSchema>;
 
 export const editFilesResultSchema = z.object({
   items: z.array(editResultSchema),
 });
+/** Result of editing multiple files in one request. */
 export type EditFilesResult = z.infer<typeof editFilesResultSchema>;
 
 export const setPermissionsParamsSchema = z

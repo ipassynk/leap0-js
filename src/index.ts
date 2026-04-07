@@ -1,16 +1,8 @@
 export {
-  DEFAULT_BASE_URL,
-  DEFAULT_CLIENT_TIMEOUT,
   DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
   DEFAULT_DESKTOP_TEMPLATE_NAME,
-  DEFAULT_MEMORY_MIB,
-  DEFAULT_SANDBOX_DOMAIN,
   DEFAULT_TEMPLATE_NAME,
-  DEFAULT_TIMEOUT_MIN,
-  DEFAULT_VCPU,
 } from "@/config/constants.js";
-
-export { SDK_VERSION } from "@/core/version.js";
 
 export {
   Leap0ConflictError,
@@ -54,9 +46,7 @@ export type {
   CreateSandboxParams,
   CreateSnapshotParams,
   CreateTemplateParams,
-  DesktopClickParams,
   DesktopDisplayInfo,
-  DesktopDragParams,
   DesktopHealth,
   DesktopPointerPosition,
   DesktopProcessErrors,
@@ -65,15 +55,9 @@ export type {
   DesktopProcessStatus,
   DesktopProcessStatusList,
   DesktopRecordingStatus,
-  DesktopScreenshotParams,
   DesktopRecordingSummary,
-  DesktopScreenshotRegionParams,
-  DesktopScrollParams,
-  DesktopSetScreenParams,
-  DesktopStatusStreamEvent,
   DesktopWindow,
   EditFileResult,
-  EditFilesResult,
   EditResult,
   ExecutionLogs,
   FileEdit,
@@ -89,14 +73,10 @@ export type {
   ProcessResult,
   PtySession,
   ResumeSnapshotParams,
-  SandboxData,
-  SandboxRef,
   SearchMatch,
-  SnapshotData,
   SshAccess,
   SshValidation,
   StreamEvent,
-  TemplateData,
   TreeEntry,
   TreeResult,
 } from "@/models/index.js";

@@ -44,7 +44,11 @@ function compact(obj: JsonObject): JsonObject {
   return result;
 }
 
-/** Performs filesystem operations inside a sandbox. */
+/**
+ * Performs filesystem operations inside a sandbox.
+ *
+ * @throws {Leap0Error} If API calls or response validation fail.
+ */
 export class FilesystemClient {
   constructor(private readonly transport: Leap0Transport) {}
 
@@ -52,7 +56,7 @@ export class FilesystemClient {
     return `/v1/sandbox/${sandboxIdOf(sandbox)}/filesystem/${endpoint}`;
   }
 
-  /** Lists directory contents. */
+  /** Lists directory contents, optionally recursively. */
   async ls(
     sandbox: SandboxRef,
     path: string,
@@ -80,7 +84,7 @@ export class FilesystemClient {
     return normalize(fileInfoSchema, data);
   }
 
-  /** Creates a directory. Set recursive to create parent directories. */
+  /** Creates a directory. Set `recursive` to create parent directories. */
   async mkdir(
     sandbox: SandboxRef,
     path: string,
@@ -120,7 +124,7 @@ export class FilesystemClient {
     );
   }
 
-  /** Writes text to a single file path. */
+  /** Writes UTF-8 text to a single file path. */
   async writeFile(
     sandbox: SandboxRef,
     path: string,
@@ -148,7 +152,7 @@ export class FilesystemClient {
     );
   }
 
-  /** Writes multiple text files in a single request. */
+  /** Writes multiple UTF-8 text files in a single request. */
   async writeFiles(
     sandbox: SandboxRef,
     files: Record<string, string>,
@@ -162,7 +166,12 @@ export class FilesystemClient {
     await this.writeFilesBytes(sandbox, bytesFiles, options);
   }
 
-  /** Reads a single file and returns its raw bytes. */
+  /**
+   * Reads a single file and returns its raw bytes.
+   *
+   * @throws {Error} If both `head` and `tail` are provided.
+   * @throws {Leap0Error} If the read request fails.
+   */
   async readBytes(
     sandbox: SandboxRef,
     path: string,
@@ -177,7 +186,17 @@ export class FilesystemClient {
     );
   }
 
-  /** Reads a single file and returns its content decoded as text. */
+  /**
+   * Reads a single file and returns its content decoded as text.
+   *
+   * @throws {Error} If both `head` and `tail` are provided.
+   * @throws {Leap0Error} If the read request fails.
+   *
+   * @example
+   * ```ts
+   * const readme = await sandbox.filesystem.readFile("/workspace/README.md");
+   * ```
+   */
   async readFile(
     sandbox: SandboxRef,
     path: string,
@@ -192,7 +211,12 @@ export class FilesystemClient {
     );
   }
 
-  /** Reads multiple files and returns raw bytes keyed by path. */
+  /**
+   * Reads multiple files and returns raw bytes keyed by path.
+   *
+   * @throws {Error} If the multipart response is malformed.
+   * @throws {Leap0Error} If the read request fails.
+   */
   async readFilesBytes(
     sandbox: SandboxRef,
     paths: string[],
@@ -233,7 +257,7 @@ export class FilesystemClient {
     return result;
   }
 
-  /** Deletes a file or directory. Set recursive for non-empty directories. */
+  /** Deletes a file or directory. Set `recursive` for non-empty directories. */
   async delete(
     sandbox: SandboxRef,
     path: string,
@@ -247,7 +271,11 @@ export class FilesystemClient {
     );
   }
 
-  /** Sets file mode and optionally changes owner and group. */
+  /**
+   * Sets file mode and optionally changes owner and group.
+   *
+   * @throws {Leap0Error} If params are invalid or the request fails.
+   */
   async setPermissions(
     sandbox: SandboxRef,
     path: string,

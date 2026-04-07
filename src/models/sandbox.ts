@@ -7,6 +7,7 @@ import {
   DEFAULT_VCPU,
 } from "@/config/constants.js";
 
+/** Supported outbound network policy modes for a sandbox. */
 export const NetworkPolicyMode = {
   ALLOW_ALL: "allow-all",
   DENY_ALL: "deny-all",
@@ -99,6 +100,7 @@ export const networkPolicySchema = z.object({
     .max(20)
     .optional(),
 });
+/** Network policy configuration applied to sandbox egress traffic. */
 export type NetworkPolicy = z.infer<typeof networkPolicySchema>;
 
 export const sandboxStateSchema = z.enum([
@@ -110,6 +112,7 @@ export const sandboxStateSchema = z.enum([
   SandboxState.DELETING,
   SandboxState.DELETED,
 ]);
+/** Lifecycle states reported for a sandbox. */
 export type SandboxState = z.infer<typeof sandboxStateSchema>;
 
 export const sandboxDataSchema = z
@@ -129,6 +132,7 @@ export const sandboxDataSchema = z
     updatedAt: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Sandbox resource returned by the control plane API. */
 export type SandboxData = z.infer<typeof sandboxDataSchema>;
 
 export const createSandboxParamsSchema = z.object({
@@ -142,6 +146,7 @@ export const createSandboxParamsSchema = z.object({
   envVars: z.record(z.string(), z.string()).optional(),
   networkPolicy: networkPolicySchema.optional(),
 });
+/** Parameters accepted when creating a sandbox. */
 export type CreateSandboxParams = z.infer<typeof createSandboxParamsSchema>;
 
 export const createSandboxRuntimeParamsSchema = z
@@ -203,6 +208,7 @@ type NetworkPolicyWire = {
   }>;
 };
 
+/** Converts SDK network policy input into the wire format expected by the API. */
 export function toNetworkPolicyWire(
   policy: NetworkPolicy | undefined,
 ): NetworkPolicyWire | undefined {

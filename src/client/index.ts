@@ -18,7 +18,7 @@ import {
 
 import { Sandbox, SERVICES } from "@/client/sandbox.js";
 
-/** Internal service map used by Sandbox to bind per-sandbox proxies. */
+/** @internal Internal service map used by Sandbox to bind per-sandbox proxies. */
 export interface ClientServices {
   filesystem: FilesystemClient;
   git: GitClient;
@@ -32,20 +32,36 @@ export interface ClientServices {
 
 /**
  * Top-level Leap0 SDK client that exposes all service groups.
+ *
+ * @throws {Leap0Error} If config validation fails during client construction.
+ *
+ * @example
+ * ```ts
+ * const client = new Leap0Client({ apiKey: process.env.LEAP0_API_KEY! });
+ * const sandbox = await client.sandboxes.create({ templateName: "base" });
+ * ```
  */
 export class Leap0Client {
   private closed = false;
   private readonly sdkOtelEnabled: boolean;
   private readonly transport: Leap0Transport;
 
+  /** Sandbox lifecycle APIs bound to this client. */
   readonly sandboxes: SandboxesClient<Sandbox>;
+  /** Snapshot lifecycle APIs bound to this client. */
   readonly snapshots: SnapshotsClient<Sandbox>;
+  /** Template management APIs bound to this client. */
   readonly templates: TemplatesClient;
 
   /** @internal - used by Sandbox to bind service proxies. */
   readonly [SERVICES]: ClientServices;
 
-  /** Creates a client using explicit config or environment variables. */
+  /**
+   * Creates a client using explicit config or environment variables.
+   *
+   * @param config Optional SDK configuration overrides.
+   * @throws {Leap0Error} If config validation fails during client construction.
+   */
   constructor(config: Leap0ConfigInput = {}) {
     const resolved = resolveConfig(config);
     this.transport = new Leap0Transport(resolved);
@@ -72,7 +88,11 @@ export class Leap0Client {
     };
   }
 
-  /** Closes the underlying transport. */
+  /**
+   * Closes the underlying transport.
+   *
+   * @throws {Leap0Error} If shutting down the transport fails.
+   */
   async close(): Promise<void> {
     if (this.closed) {
       return;

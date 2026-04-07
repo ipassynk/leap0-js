@@ -23,5 +23,4 @@ test("public index exports core sdk surface", () => {
   assert.equal(sdk.SandboxState.RUNNING, "running");
   assert.equal(sdk.CodeLanguage.PYTHON, "python");
   assert.equal(sdk.StreamEventType.STDOUT, "stdout");
-  assert.equal(typeof sdk.SDK_VERSION, "string");
 });

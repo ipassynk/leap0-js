@@ -18,20 +18,29 @@ import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { sandboxIdOf, snapshotIdOf } from "@/core/utils.js";
 import { withErrorPrefix } from "@/services/shared.js";
 
-import type { SandboxFactory } from "@/services/sandboxes.js";
-
-/** Creates, restores, and deletes named snapshots. */
+/**
+ * Creates, restores, and deletes named snapshots.
+ *
+ * @throws {Leap0Error} If request validation, API calls, or response validation fail.
+ */
 export class SnapshotsClient<T = SandboxData> {
   constructor(
     private readonly transport: Leap0Transport,
-    private readonly sandboxFactory?: SandboxFactory<T>,
+    private readonly sandboxFactory?: (data: SandboxData) => T,
   ) {}
 
   private wrap(data: SandboxData): T {
     return (this.sandboxFactory ? this.sandboxFactory(data) : data) as T;
   }
 
-  /** Creates a snapshot from a running sandbox. */
+  /**
+   * Creates a snapshot from a running sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Optional snapshot naming parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The created snapshot resource.
+   */
   async create(
     sandbox: SandboxRef,
     params: CreateSnapshotParams = {},
@@ -48,7 +57,14 @@ export class SnapshotsClient<T = SandboxData> {
     });
   }
 
-  /** Creates a snapshot and terminates the source sandbox. */
+  /**
+   * Creates a snapshot and terminates the source sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param params Optional snapshot naming parameters.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The created snapshot resource.
+   */
   async pause(
     sandbox: SandboxRef,
     params: CreateSnapshotParams = {},
@@ -65,7 +81,13 @@ export class SnapshotsClient<T = SandboxData> {
     });
   }
 
-  /** Restores a sandbox from a snapshot. */
+  /**
+   * Restores a sandbox from a snapshot.
+   *
+   * @param params Snapshot name and optional sandbox overrides.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The restored sandbox, optionally wrapped in a custom sandbox type.
+   */
   async resume(params: ResumeSnapshotParams, options: RequestOptions = {}): Promise<T> {
     return withErrorPrefix("Failed to resume snapshot: ", async () => {
       const parsed = resumeSnapshotParamsSchema.parse(params);

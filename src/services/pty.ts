@@ -11,14 +11,24 @@ import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { ptySessionSchema } from "@/models/pty.js";
 import { sandboxIdOf, websocketUrlFromHttp } from "@/core/utils.js";
 
-/** Thin wrapper around an interactive PTY websocket connection. */
+/**
+ * Thin wrapper around an interactive PTY websocket connection.
+ *
+ * @throws {Leap0WebSocketError} If the websocket errors or closes while receiving data.
+ */
 export class PtyConnection {
   constructor(private readonly socket: WebSocket) {}
 
+  /** Sends raw data to the PTY websocket. */
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
     this.socket.send(data);
   }
 
+  /**
+   * Waits for the next websocket message.
+   *
+   * @throws {Leap0WebSocketError} If the websocket errors or closes before a message arrives.
+   */
   recv(): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       const cleanup = () => {
@@ -56,15 +66,21 @@ export class PtyConnection {
     });
   }
 
+  /** Closes the websocket connection. */
   close(): void {
     this.socket.close();
   }
 }
 
-/** Creates and manages PTY sessions for interactive terminals. */
+/**
+ * Creates and manages PTY sessions for interactive terminals.
+ *
+ * @throws {Leap0Error} If API calls or response validation fail.
+ */
 export class PtyClient {
   constructor(private readonly transport: Leap0Transport) {}
 
+  /** Lists PTY sessions for a sandbox. */
   async list(sandbox: SandboxRef, options: RequestOptions = {}): Promise<PtySession[]> {
     const data = await this.transport.requestJson(
       `/v1/sandbox/${sandboxIdOf(sandbox)}/pty`,
@@ -74,6 +90,11 @@ export class PtyClient {
     return normalize(z.object({ items: z.array(ptySessionSchema) }), data).items;
   }
 
+  /**
+   * Creates a PTY session.
+   *
+   * @returns The created PTY session.
+   */
   async create(
     sandbox: SandboxRef,
     params: CreatePtySessionParams = {},
@@ -97,6 +118,7 @@ export class PtyClient {
     return normalize(ptySessionSchema, data);
   }
 
+  /** Fetches a PTY session by ID. */
   async get(
     sandbox: SandboxRef,
     sessionId: string,
@@ -110,6 +132,7 @@ export class PtyClient {
     return normalize(ptySessionSchema, data);
   }
 
+  /** Deletes a PTY session. */
   async delete(
     sandbox: SandboxRef,
     sessionId: string,
@@ -122,6 +145,7 @@ export class PtyClient {
     );
   }
 
+  /** Resizes an existing PTY session. */
   async resize(
     sandbox: SandboxRef,
     sessionId: string,
@@ -137,16 +161,30 @@ export class PtyClient {
     return normalize(ptySessionSchema, data);
   }
 
+  /** Returns the websocket URL for a PTY session. */
   websocketUrl(sandbox: SandboxRef, sessionId: string): string {
     return websocketUrlFromHttp(
       `${this.transport.baseUrl}/v1/sandbox/${sandboxIdOf(sandbox)}/pty/${encodeURIComponent(sessionId)}/connect`,
     );
   }
 
+  /** Returns auth headers to use when opening the PTY websocket manually. */
   websocketHeaders(): Record<string, string> {
     return { authorization: this.transport.apiKey };
   }
 
+  /**
+   * Opens a websocket connection for an existing PTY session.
+   *
+   * @throws {Leap0WebSocketError} If subsequent websocket reads fail.
+   *
+   * @example
+   * ```ts
+   * const pty = sandbox.pty.connect("shell");
+   * pty.send("ls\n");
+   * const output = await pty.recv();
+   * ```
+   */
   connect(sandbox: SandboxRef, sessionId: string): PtyConnection {
     return new PtyConnection(
       new WebSocket(this.websocketUrl(sandbox, sessionId), {

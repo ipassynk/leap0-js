@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+/** Supported languages for sandbox code execution. */
 export const CodeLanguage = {
   PYTHON: "python",
   TYPESCRIPT: "typescript",
 } as const;
 
+/** Event types emitted by streaming code execution. */
 export const StreamEventType = {
   STDOUT: "stdout",
   STDERR: "stderr",
@@ -13,6 +15,7 @@ export const StreamEventType = {
 } as const;
 
 export const codeLanguageSchema = z.enum([CodeLanguage.PYTHON, CodeLanguage.TYPESCRIPT]);
+/** Code interpreter language identifier. */
 export type CodeLanguage = z.infer<typeof codeLanguageSchema>;
 
 export const streamEventTypeSchema = z.enum([
@@ -21,6 +24,7 @@ export const streamEventTypeSchema = z.enum([
   StreamEventType.EXIT,
   StreamEventType.ERROR,
 ]);
+/** Stream event type identifier. */
 export type StreamEventType = z.infer<typeof streamEventTypeSchema>;
 
 export const codeContextSchema = z
@@ -30,6 +34,7 @@ export const codeContextSchema = z
     cwd: z.string(),
   })
   .catchall(z.unknown());
+/** Reusable interpreter context descriptor. */
 export type CodeContext = z.infer<typeof codeContextSchema>;
 
 export const codeExecutionOutputSchema = z
@@ -48,6 +53,7 @@ export const codeExecutionOutputSchema = z
     extra: z.record(z.string(), z.unknown()).optional(),
   })
   .catchall(z.unknown());
+/** Rich output item returned by the code interpreter. */
 export type CodeExecutionOutput = z.infer<typeof codeExecutionOutputSchema>;
 
 export const codeExecutionErrorSchema = z
@@ -57,12 +63,14 @@ export const codeExecutionErrorSchema = z
     traceback: z.string().optional(),
   })
   .catchall(z.unknown());
+/** Structured execution error returned by the code interpreter. */
 export type CodeExecutionError = z.infer<typeof codeExecutionErrorSchema>;
 
 export const executionLogsSchema = z.object({
   stdout: z.array(z.string()).optional(),
   stderr: z.array(z.string()).optional(),
 });
+/** Collected stdout and stderr logs from an execution. */
 export type ExecutionLogs = z.infer<typeof executionLogsSchema>;
 
 export const codeExecutionResultSchema = z
@@ -74,6 +82,7 @@ export const codeExecutionResultSchema = z
     executionCount: z.number().optional(),
   })
   .catchall(z.unknown());
+/** Final result returned by a code execution request. */
 export type CodeExecutionResult = z.infer<typeof codeExecutionResultSchema>;
 
 export const streamEventWireSchema = z.object({
@@ -81,6 +90,7 @@ export const streamEventWireSchema = z.object({
   data: z.union([z.string(), z.number()]).optional(),
   code: z.number().optional(),
 });
+/** Raw wire event received from the streaming execution endpoint. */
 export type StreamEventWire = z.infer<typeof streamEventWireSchema>;
 
 export const streamEventSchema = z.object({
@@ -88,4 +98,5 @@ export const streamEventSchema = z.object({
   data: z.union([z.string(), z.number()]).optional(),
   code: z.number().optional(),
 });
+/** Normalized stream event yielded by `executeStream()`. */
 export type StreamEvent = z.infer<typeof streamEventSchema>;

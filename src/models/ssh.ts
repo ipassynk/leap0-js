@@ -11,6 +11,7 @@ export const sshAccessSchema = z
     sshCommand: z.string(),
   })
   .catchall(z.unknown());
+/** SSH credential bundle generated for sandbox access. */
 export type SshAccess = z.infer<typeof sshAccessSchema>;
 
 export const sshValidationSchema = z
@@ -19,4 +20,5 @@ export const sshValidationSchema = z
     sandboxId: z.string(),
   })
   .catchall(z.unknown());
+/** Result of validating an SSH credential pair. */
 export type SshValidation = z.infer<typeof sshValidationSchema>;

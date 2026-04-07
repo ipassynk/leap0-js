@@ -1,3 +1,8 @@
+/**
+ * Base SDK error for request, transport, and response-validation failures.
+ *
+ * Includes optional HTTP metadata and a `retryable` hint for transient failures.
+ */
 export class Leap0Error extends Error {
   readonly statusCode?: number;
   readonly headers?: Headers;
@@ -23,6 +28,7 @@ export class Leap0Error extends Error {
   }
 }
 
+/** Error thrown when the API rejects a request due to missing permissions. */
 export class Leap0PermissionError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, options);
@@ -30,6 +36,7 @@ export class Leap0PermissionError extends Leap0Error {
   }
 }
 
+/** Error thrown when a requested API resource does not exist. */
 export class Leap0NotFoundError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, options);
@@ -37,6 +44,7 @@ export class Leap0NotFoundError extends Leap0Error {
   }
 }
 
+/** Error thrown when a request conflicts with the current server state. */
 export class Leap0ConflictError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, options);
@@ -44,6 +52,7 @@ export class Leap0ConflictError extends Leap0Error {
   }
 }
 
+/** Error thrown when the API rate-limits a request. */
 export class Leap0RateLimitError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, { ...options, retryable: true });
@@ -51,6 +60,7 @@ export class Leap0RateLimitError extends Leap0Error {
   }
 }
 
+/** Error thrown when a request exceeds the configured timeout. */
 export class Leap0TimeoutError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, { ...options, retryable: true });
@@ -58,6 +68,7 @@ export class Leap0TimeoutError extends Leap0Error {
   }
 }
 
+/** Error thrown for websocket-specific failures such as disconnects or protocol issues. */
 export class Leap0WebSocketError extends Leap0Error {
   constructor(message: string, options: ConstructorParameters<typeof Leap0Error>[1] = {}) {
     super(message, options);

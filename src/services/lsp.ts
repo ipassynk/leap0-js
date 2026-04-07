@@ -7,7 +7,12 @@ import type {
 import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { sandboxIdOf, toFileUri } from "@/core/utils.js";
 
-/** Starts and interacts with language servers inside a sandbox. */
+/**
+ * Starts and interacts with language servers inside a sandbox.
+ *
+ * @throws {Leap0Error} If an API call fails.
+ * @throws {Error} If the service returns an unexpected empty response.
+ */
 export class LspClient {
   constructor(private readonly transport: Leap0Transport) {}
 
@@ -43,6 +48,7 @@ export class LspClient {
     return { text: textOrOptions, version: versionOrOptions ?? 1, options };
   }
 
+  /** Starts a language server for a project path inside the sandbox. */
   async start(
     sandbox: SandboxRef,
     languageId: string,
@@ -56,6 +62,7 @@ export class LspClient {
       options,
     );
   }
+  /** Stops a previously started language server. */
   async stop(
     sandbox: SandboxRef,
     languageId: string,
@@ -69,6 +76,25 @@ export class LspClient {
       options,
     );
   }
+  /**
+   * Opens a document in the language server.
+   *
+   * @param uri File URI to open.
+   * @param textOrOptions Optional in-memory document text, or request options when opening from disk.
+   * @param versionOrOptions Optional document version, or request options when no explicit version is needed.
+   * @param options Optional request options.
+   *
+   * @example
+   * ```ts
+   * await sandbox.lsp.didOpen(
+   *   "typescript",
+   *   "/workspace/app",
+   *   "file:///workspace/app/src/index.ts",
+   *   "const x = 1;",
+   *   1,
+   * );
+   * ```
+   */
   async didOpen(
     sandbox: SandboxRef,
     languageId: string,
@@ -96,6 +122,7 @@ export class LspClient {
       normalizedOptions,
     );
   }
+  /** Opens a document by filesystem path instead of a file URI. */
   async didOpenPath(
     sandbox: SandboxRef,
     languageId: string,
@@ -115,6 +142,7 @@ export class LspClient {
       options,
     );
   }
+  /** Closes a previously opened document. */
   async didClose(
     sandbox: SandboxRef,
     languageId: string,
@@ -131,6 +159,7 @@ export class LspClient {
       options,
     );
   }
+  /** Closes a document by filesystem path instead of a file URI. */
   async didClosePath(
     sandbox: SandboxRef,
     languageId: string,
@@ -140,6 +169,11 @@ export class LspClient {
   ): Promise<void> {
     await this.didClose(sandbox, languageId, pathToProject, toFileUri(path), options);
   }
+  /**
+   * Requests completion items at a line/character position.
+   *
+   * @returns The raw JSON-RPC response from the language server.
+   */
   async completions(
     sandbox: SandboxRef,
     languageId: string,
@@ -161,6 +195,7 @@ export class LspClient {
       options,
     );
   }
+  /** Requests completion items for a filesystem path. */
   async completionsPath(
     sandbox: SandboxRef,
     languageId: string,
@@ -180,6 +215,7 @@ export class LspClient {
       options,
     );
   }
+  /** Returns document symbols for an open document. */
   async documentSymbols(
     sandbox: SandboxRef,
     languageId: string,
@@ -194,6 +230,7 @@ export class LspClient {
       options,
     );
   }
+  /** Returns document symbols for a filesystem path. */
   async documentSymbolsPath(
     sandbox: SandboxRef,
     languageId: string,

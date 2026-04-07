@@ -4,6 +4,7 @@ export const TEMPLATE_NAME_ERROR_MESSAGE =
   "name must be non-empty, <= 64 chars, contain no whitespace, and not start with system/";
 export const TEMPLATE_URI_ERROR_MESSAGE = "uri must be non-empty and <= 500 chars";
 
+/** Supported private registry credential types for template imports. */
 export const RegistryCredentialType = {
   BASIC: "basic",
   AWS: "aws",
@@ -20,6 +21,7 @@ export const templateImageConfigSchema = z
     env: z.record(z.string(), z.string()).nullable().optional(),
   })
   .catchall(z.unknown());
+/** OCI image configuration captured for a template. */
 export type TemplateImageConfig = z.infer<typeof templateImageConfigSchema>;
 
 export const templateDataSchema = z
@@ -32,6 +34,7 @@ export const templateDataSchema = z
     createdAt: z.string(),
   })
   .catchall(z.unknown());
+/** Template resource returned by the control plane API. */
 export type TemplateData = z.infer<typeof templateDataSchema>;
 
 export const registryCredentialTypeSchema = z.enum([
@@ -40,6 +43,7 @@ export const registryCredentialTypeSchema = z.enum([
   RegistryCredentialType.GCP,
   RegistryCredentialType.AZURE,
 ]);
+/** Registry credential type discriminator. */
 export type RegistryCredentialType = z.infer<typeof registryCredentialTypeSchema>;
 
 export const basicRegistryCredentialsSchema = z.object({
@@ -74,10 +78,15 @@ export const registryCredentialsSchema = z.discriminatedUnion("type", [
   azureRegistryCredentialsSchema,
 ]);
 
+/** Username/password credentials for a private registry. */
 export type BasicRegistryCredentials = z.infer<typeof basicRegistryCredentialsSchema>;
+/** AWS registry credentials for ECR-backed template imports. */
 export type AwsRegistryCredentials = z.infer<typeof awsRegistryCredentialsSchema>;
+/** GCP registry credentials for Artifact Registry or GCR-backed imports. */
 export type GcpRegistryCredentials = z.infer<typeof gcpRegistryCredentialsSchema>;
+/** Azure registry credentials for ACR-backed template imports. */
 export type AzureRegistryCredentials = z.infer<typeof azureRegistryCredentialsSchema>;
+/** Union of all supported private registry credential payloads. */
 export type RegistryCredentials = z.infer<typeof registryCredentialsSchema>;
 
 export const createTemplateParamsSchema = z.object({
@@ -85,6 +94,7 @@ export const createTemplateParamsSchema = z.object({
   uri: z.string(),
   credentials: registryCredentialsSchema.optional(),
 });
+/** Parameters accepted when creating a template from a container image URI. */
 export type CreateTemplateParams = z.infer<typeof createTemplateParamsSchema>;
 
 export const templateNameSchema = z.string().superRefine((name, ctx) => {
@@ -118,4 +128,5 @@ export const createTemplateRequestSchema = createTemplateParamsSchema.extend({
 export const renameTemplateParamsSchema = z.object({
   name: templateNameSchema,
 });
+/** Parameters accepted when renaming a template. */
 export type RenameTemplateParams = z.infer<typeof renameTemplateParamsSchema>;

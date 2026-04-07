@@ -16,7 +16,11 @@ import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { templateIdOf } from "@/core/utils.js";
 import { withErrorPrefix } from "@/services/shared.js";
 
-/** Uploads and manages reusable container templates. */
+/**
+ * Uploads and manages reusable container templates.
+ *
+ * @throws {Leap0Error} If request validation, API calls, or response validation fail.
+ */
 export class TemplatesClient {
   constructor(private readonly transport: Leap0Transport) {}
 
@@ -24,7 +28,15 @@ export class TemplatesClient {
     return templateNameSchema.parse(name);
   }
 
-  /** Uploads a new template from a container image URI. */
+  /**
+   * Uploads a new template from a container image URI.
+   *
+   * @param params.name Template name to create.
+   * @param params.uri Container image URI to import.
+   * @param params.credentials Optional private registry credentials.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The created template.
+   */
   async create(params: CreateTemplateParams, options: RequestOptions = {}): Promise<TemplateData> {
     const parsed = createTemplateRequestSchema.parse(params);
     return withErrorPrefix("Failed to create template: ", async () => {
@@ -37,7 +49,13 @@ export class TemplatesClient {
     });
   }
 
-  /** Renames a template. */
+  /**
+   * Renames a template.
+   *
+   * @param template Template ID or template-like object.
+   * @param params New template name.
+   * @param options Optional request settings such as timeout and query params.
+   */
   async rename(
     template: TemplateRef,
     params: RenameTemplateParams,

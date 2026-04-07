@@ -8,4 +8,5 @@ export const processResultSchema = z
   })
   .catchall(z.unknown());
 
+/** Result of a one-shot process execution inside a sandbox. */
 export type ProcessResult = z.infer<typeof processResultSchema>;
