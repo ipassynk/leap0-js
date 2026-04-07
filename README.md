@@ -99,6 +99,12 @@ Run one-off shell commands inside a running sandbox.
 const result = await sandbox.process.execute({ command: "ls -la /workspace" });
 console.log(result.stdout);
 console.log(result.stderr);
+
+const templated = await sandbox.process.execute({
+  command: "echo $NAME from ${PLACE}",
+  cwd: "/workspace/$NAME",
+  env: { NAME: "leap0", PLACE: "sandbox" },
+});
 ```
 
 ### Interactive Terminal (PTY)
