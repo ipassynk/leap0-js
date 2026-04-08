@@ -1,20 +1,8 @@
 import { normalize } from "@/core/normalize.js";
-import type { ProcessResult, RequestOptions, SandboxRef } from "@/models/index.js";
+import type { ExecuteProcessParams, ProcessResult, RequestOptions, SandboxRef } from "@/models/index.js";
 import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { processResultSchema } from "@/models/process.js";
 import { sandboxIdOf } from "@/core/utils.js";
-
-const ENV_REF_RE = /\$\{([A-Za-z_][A-Za-z0-9_]*)}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
-
-function expandEnv(value: string, env: Record<string, string>): string {
-  return value.replace(ENV_REF_RE, (match, bracketed, plain) => {
-    const key = bracketed ?? plain;
-    if (!Object.prototype.hasOwnProperty.call(env, key)) {
-      return match;
-    }
-    return env[key] ?? match;
-  });
-}
 
 /**
  * Executes one-shot commands inside a sandbox.
@@ -32,7 +20,7 @@ export class ProcessClient {
    * @param params.command Command line to execute.
    * @param params.cwd Optional working directory.
    * @param params.timeout Optional command timeout in milliseconds.
-   * @param params.env Optional local values used to expand `$NAME` and `${NAME}` in string fields.
+   * @param params.env Optional environment variables applied to the spawned process.
    * @param options Optional request settings such as timeout and query params.
    * @returns The process exit code and collected stdout/stderr output.
    *
@@ -43,13 +31,13 @@ export class ProcessClient {
    */
   async execute(
     sandbox: SandboxRef,
-    params: { command: string; cwd?: string; timeout?: number; env?: Record<string, string> },
+    params: ExecuteProcessParams,
     options: RequestOptions = {},
   ): Promise<ProcessResult> {
-    const env = params.env;
     const payload = {
-      command: env ? expandEnv(params.command, env) : params.command,
-      cwd: params.cwd && env ? expandEnv(params.cwd, env) : params.cwd,
+      command: params.command,
+      cwd: params.cwd,
+      envs: params.env,
       timeout: params.timeout,
     };
     const data = await this.transport.requestJson<ProcessResult>(

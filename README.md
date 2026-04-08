@@ -100,9 +100,9 @@ const result = await sandbox.process.execute({ command: "ls -la /workspace" });
 console.log(result.stdout);
 console.log(result.stderr);
 
-const templated = await sandbox.process.execute({
-  command: "echo $NAME from ${PLACE}",
-  cwd: "/workspace/$NAME",
+const withEnv = await sandbox.process.execute({
+  command: "printenv NAME",
+  cwd: "/workspace/app",
   env: { NAME: "leap0", PLACE: "sandbox" },
 });
 ```

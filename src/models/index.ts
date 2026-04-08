@@ -38,7 +38,8 @@ export type {
 
 export type { GitCommitResult, GitResult } from "@/models/git.js";
 
-export type { ProcessResult } from "@/models/process.js";
+export { executeProcessParamsSchema } from "@/models/process.js";
+export type { ExecuteProcessParams, ProcessResult } from "@/models/process.js";
 
 export { createPtySessionParamsSchema } from "@/models/pty.js";
 export type { CreatePtySessionParams, PtySession } from "@/models/pty.js";

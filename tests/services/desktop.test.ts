@@ -173,6 +173,34 @@ test("desktop waitUntilReady treats count-only updates as ready", async () => {
   await client.waitUntilReady("sb-1", 1);
 });
 
+test("desktop waitUntilReady forwards request timeout options", async () => {
+  const calls: Array<{ options: Record<string, unknown> }> = [];
+  const { transport } = createRecordedTransport({
+    streamJsonUrl: async function* (_url: string, _init: RequestInit, options: Record<string, unknown> = {}) {
+      calls.push({ options });
+      yield {
+        status: "running",
+        items: [
+          {
+            name: "x11vnc",
+            running: true,
+            stdout_log: "/tmp/x11vnc.stdout.log",
+            stderr_log: "/tmp/x11vnc.stderr.log",
+          },
+        ],
+        running: 1,
+        total: 1,
+      };
+    },
+  });
+  const client = new DesktopClient(transport as never);
+
+  await client.waitUntilReady("sb-1", 5, { timeout: 2 });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.options.timeout, 2);
+});
+
 test("desktop input methods require a real boolean ok response", async () => {
   const { transport } = createRecordedTransport({
     requestJsonUrl: async () => ({ ok: "false" }),

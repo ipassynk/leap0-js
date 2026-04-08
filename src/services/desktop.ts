@@ -641,6 +641,7 @@ export class DesktopClient {
    *
    * @param sandbox Sandbox ID or sandbox-like object.
    * @param timeout Timeout in seconds.
+   * @param options Optional request settings such as timeout and query params.
    * @throws {Leap0Error} If the desktop never becomes ready or a non-retryable error occurs.
    *
    * @example
@@ -648,14 +649,16 @@ export class DesktopClient {
    * await sandbox.desktop.waitUntilReady();
    * ```
    */
-  async waitUntilReady(sandbox: SandboxRef, timeout = 60): Promise<void> {
+  async waitUntilReady(sandbox: SandboxRef, timeout = 60, options: RequestOptions = {}): Promise<void> {
     const deadline = Date.now() + timeout * 1000;
     let lastError: unknown;
 
     while (Date.now() < deadline) {
       try {
         const remaining = Math.max(1, Math.ceil((deadline - Date.now()) / 1000));
-        for await (const status of this.statusStream(sandbox, { timeout: remaining })) {
+        const requestTimeout =
+          options.timeout === undefined ? remaining : Math.min(options.timeout, remaining);
+        for await (const status of this.statusStream(sandbox, { ...options, timeout: requestTimeout })) {
           if (status.status === "running") {
             return;
           }
