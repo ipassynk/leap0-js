@@ -100,6 +100,21 @@ test("sandboxes runtime info targets system endpoints", async () => {
   assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/system/workdir");
 });
 
+test("sandboxes runtime info rejects non-object responses", async () => {
+  const { transport } = createRecordedTransport({
+    requestJson: (path: string) => {
+      if (path.endsWith("/user-home-dir")) {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve("/tmp");
+    },
+  });
+  const client = new SandboxesClient(transport as never);
+
+  await assert.rejects(() => client.getUserHomeDir("sb-1"), /missing user_home_dir/);
+  await assert.rejects(() => client.getWorkdir("sb-1"), /missing workdir/);
+});
+
 
 test("sandboxes list sends query params and normalizes response", async () => {
   const { transport, calls } = createRecordedTransport({

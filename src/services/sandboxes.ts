@@ -211,15 +211,19 @@ export class SandboxesClient<T = SandboxData> {
    */
   async getUserHomeDir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string> {
     return withErrorPrefix("Failed to get sandbox user home directory: ", async () => {
-      const data = (await this.transport.requestJson<unknown>(
+      const data = await this.transport.requestJson<unknown>(
         `/v1/sandbox/${sandboxIdOf(sandbox)}/system/user-home-dir`,
         { method: "GET" },
         options,
-      )) as Record<string, unknown>;
-      if (typeof data.user_home_dir !== "string") {
+      );
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        typeof (data as { user_home_dir?: unknown }).user_home_dir !== "string"
+      ) {
         throw new Leap0Error("Sandbox user home directory response missing user_home_dir");
       }
-      return data.user_home_dir;
+      return (data as { user_home_dir: string }).user_home_dir;
     });
   }
 
@@ -232,15 +236,19 @@ export class SandboxesClient<T = SandboxData> {
    */
   async getWorkdir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string> {
     return withErrorPrefix("Failed to get sandbox workdir: ", async () => {
-      const data = (await this.transport.requestJson<unknown>(
+      const data = await this.transport.requestJson<unknown>(
         `/v1/sandbox/${sandboxIdOf(sandbox)}/system/workdir`,
         { method: "GET" },
         options,
-      )) as Record<string, unknown>;
-      if (typeof data.workdir !== "string") {
+      );
+      if (
+        typeof data !== "object" ||
+        data === null ||
+        typeof (data as { workdir?: unknown }).workdir !== "string"
+      ) {
         throw new Leap0Error("Sandbox workdir response missing workdir");
       }
-      return data.workdir;
+      return (data as { workdir: string }).workdir;
     });
   }
 
