@@ -18,7 +18,9 @@ export { Leap0Client, Sandbox } from "@/client/index.js";
 export {
   CodeLanguage,
   listSandboxesParamsSchema,
+  listSandboxesResponseSchema,
   listSnapshotsParamsSchema,
+  listSnapshotsResponseSchema,
   NetworkPolicyMode,
   RegistryCredentialType,
   SandboxState,
