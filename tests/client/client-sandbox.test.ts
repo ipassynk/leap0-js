@@ -86,6 +86,8 @@ test("Sandbox binds service methods to itself", async () => {
         createdAt: "2026-01-01T00:00:00Z",
       }),
       delete: async () => undefined,
+      getUserHomeDir: async (id: string) => `home:${id}`,
+      getWorkdir: async (id: string) => `workdir:${id}`,
       invokeUrl: (id: string, path: string, port?: number) => `invoke:${id}:${path}:${port ?? ""}`,
       websocketUrl: (id: string, path: string, port?: number) => `ws:${id}:${path}:${port ?? ""}`,
     },
@@ -120,8 +122,6 @@ test("Sandbox binds service methods to itself", async () => {
   await sandbox.pause();
   assert.equal(sandbox.state, "paused");
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
-  fakeClient.sandboxes.getUserHomeDir = async (id: string) => `home:${id}`;
-  fakeClient.sandboxes.getWorkdir = async (id: string) => `workdir:${id}`;
   assert.equal(await sandbox.getUserHomeDir(), "home:sb-1");
   assert.equal(await sandbox.getWorkdir(), "workdir:sb-1");
 });
