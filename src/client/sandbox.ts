@@ -230,4 +230,25 @@ export class Sandbox implements SandboxData {
   websocketUrl(path = "/", port?: number): string {
     return this.client.sandboxes.websocketUrl(this.id, path, port);
   }
+
+  /**
+   * Fetches the resolved home directory for the sandbox user.
+   *
+   * @param options Optional request settings.
+   * @returns The resolved sandbox user home directory.
+   */
+  async getUserHomeDir(options?: { timeout?: number }): Promise<string> {
+    return this.client.sandboxes.getUserHomeDir(this.id, options);
+  }
+
+  /**
+   * Fetches the configured working directory for the sandbox.
+   *
+   * @param options Optional request settings.
+   * @returns The configured sandbox workdir.
+   */
+  async getWorkdir(options?: { timeout?: number }): Promise<string> {
+    return this.client.sandboxes.getWorkdir(this.id, options);
+  }
+
 }

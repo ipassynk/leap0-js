@@ -2,12 +2,26 @@ export type { RequestOptions } from "@/models/shared.js";
 
 export type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/refs.js";
 
-export { createSandboxParamsSchema, NetworkPolicyMode, SandboxState } from "@/models/sandbox.js";
-export type { CreateSandboxParams, NetworkPolicy, SandboxData } from "@/models/sandbox.js";
+export {
+  createSandboxParamsSchema,
+  listSandboxesParamsSchema,
+  NetworkPolicyMode,
+  SandboxState,
+} from "@/models/sandbox.js";
+export type {
+  CreateSandboxParams,
+  ListSandboxesParams,
+  ListSandboxesResponse,
+  NetworkPolicy,
+  SandboxData,
+  SandboxListItem,
+} from "@/models/sandbox.js";
 
-export { createSnapshotParamsSchema } from "@/models/snapshot.js";
+export { createSnapshotParamsSchema, listSnapshotsParamsSchema } from "@/models/snapshot.js";
 export type {
   CreateSnapshotParams,
+  ListSnapshotsParams,
+  ListSnapshotsResponse,
   ResumeSnapshotParams,
   SnapshotData,
 } from "@/models/snapshot.js";

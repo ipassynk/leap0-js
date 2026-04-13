@@ -3,11 +3,15 @@ import { Leap0Error } from "@/core/errors.js";
 import { normalize } from "@/core/normalize.js";
 import {
   createSandboxRuntimeParamsSchema,
+  listSandboxesParamsSchema,
+  listSandboxesResponseSchema,
   sandboxDataSchema,
   toNetworkPolicyWire,
 } from "@/models/sandbox.js";
 import type {
   CreateSandboxParams,
+  ListSandboxesParams,
+  ListSandboxesResponse,
   RequestOptions,
   SandboxData,
   SandboxRef,
@@ -119,6 +123,38 @@ export class SandboxesClient<T = SandboxData> {
   }
 
   /**
+   * Lists sandboxes for the authenticated organization.
+   *
+   * @param params Optional filter, sort, and pagination parameters.
+   * @param options Optional request settings such as timeout and headers.
+   * @returns Paginated sandbox summaries.
+   */
+  async list(
+    params: ListSandboxesParams = {},
+    options: RequestOptions = {},
+  ): Promise<ListSandboxesResponse> {
+    return withErrorPrefix("Failed to list sandboxes: ", async () => {
+      const parsed = listSandboxesParamsSchema.parse(params);
+      const data = await this.transport.requestJson<unknown>(
+        "/v1/sandboxes",
+        { method: "GET" },
+        {
+          ...options,
+          query: {
+            ...options.query,
+            state: parsed.state,
+            sort: parsed.sort,
+            "order-by": parsed.orderBy,
+            page: parsed.page,
+            "page-size": parsed.pageSize,
+          },
+        },
+      );
+      return normalize(listSandboxesResponseSchema, data);
+    });
+  }
+
+  /**
    * Pauses a running sandbox.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
@@ -165,6 +201,49 @@ export class SandboxesClient<T = SandboxData> {
       this.transport.request(`/v1/sandbox/${sandboxIdOf(sandbox)}/`, { method: "DELETE" }, options),
     );
   }
+
+  /**
+   * Fetches the resolved home directory for the sandbox user.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The resolved sandbox user home directory.
+   */
+  async getUserHomeDir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string> {
+    return withErrorPrefix("Failed to get sandbox user home directory: ", async () => {
+      const data = (await this.transport.requestJson<unknown>(
+        `/v1/sandbox/${sandboxIdOf(sandbox)}/system/user-home-dir`,
+        { method: "GET" },
+        options,
+      )) as Record<string, unknown>;
+      if (typeof data.user_home_dir !== "string") {
+        throw new Leap0Error("Sandbox user home directory response missing user_home_dir");
+      }
+      return data.user_home_dir;
+    });
+  }
+
+  /**
+   * Fetches the configured working directory for the sandbox.
+   *
+   * @param sandbox Sandbox ID or sandbox-like object.
+   * @param options Optional request settings such as timeout and query params.
+   * @returns The configured sandbox workdir.
+   */
+  async getWorkdir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string> {
+    return withErrorPrefix("Failed to get sandbox workdir: ", async () => {
+      const data = (await this.transport.requestJson<unknown>(
+        `/v1/sandbox/${sandboxIdOf(sandbox)}/system/workdir`,
+        { method: "GET" },
+        options,
+      )) as Record<string, unknown>;
+      if (typeof data.workdir !== "string") {
+        throw new Leap0Error("Sandbox workdir response missing workdir");
+      }
+      return data.workdir;
+    });
+  }
+
 
   /**
    * Builds the public invoke URL for a sandbox.

@@ -17,6 +17,8 @@ export {
 export { Leap0Client, Sandbox } from "@/client/index.js";
 export {
   CodeLanguage,
+  listSandboxesParamsSchema,
+  listSnapshotsParamsSchema,
   NetworkPolicyMode,
   RegistryCredentialType,
   SandboxState,
@@ -44,7 +46,11 @@ export type {
   CodeExecutionResult,
   CreatePtySessionParams,
   CreateSandboxParams,
+  ListSandboxesParams,
+  ListSandboxesResponse,
   CreateSnapshotParams,
+  ListSnapshotsParams,
+  ListSnapshotsResponse,
   CreateTemplateParams,
   DesktopDisplayInfo,
   DesktopHealth,
@@ -73,6 +79,7 @@ export type {
   ProcessResult,
   PtySession,
   ResumeSnapshotParams,
+  SandboxListItem,
   SearchMatch,
   SshAccess,
   SshValidation,
