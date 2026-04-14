@@ -14,8 +14,9 @@ function makeClient() {
         template_id: "tpl-1",
         state: "running",
         vcpu: 2,
-        memory_mib: 1024,
-        disk_mib: 4096,
+        memory: 1024,
+        disk: 4096,
+        timeout: 10,
         auto_pause: false,
         created_at: "2026-01-01T00:00:00Z",
       });
@@ -48,13 +49,13 @@ test("sandboxes create validates payload and wraps result", async () => {
   const result = await client.create({
     templateName: " custom ",
     vcpu: 2,
-    memoryMib: 1024,
-    timeoutMin: 10,
+    memory: 1024,
+    timeout: 10,
   });
   assert.equal(result.id, "sb-1");
   assert.equal(result.templateId, "tpl-1");
-  assert.equal(result.memoryMib, 1024);
-  assert.equal(result.diskMib, 4096);
+  assert.equal(result.memory, 1024);
+  assert.equal(result.disk, 4096);
   assert.equal(result.createdAt, "2026-01-01T00:00:00Z");
   assert.equal(calls[0]?.path, "/v1/sandbox");
   assert.equal((jsonOf(calls[0]!) as { template_name: string }).template_name, "custom");
@@ -68,8 +69,8 @@ test("sandboxes create rejects invalid parameters", async () => {
     /templateName must be a string/,
   );
   await assert.rejects(() => client.create({ vcpu: 0 }), Leap0Error);
-  await assert.rejects(() => client.create({ memoryMib: 513 }), Leap0Error);
-  await assert.rejects(() => client.create({ timeoutMin: 999 }), Leap0Error);
+  await assert.rejects(() => client.create({ memory: 513 }), Leap0Error);
+  await assert.rejects(() => client.create({ timeout: 99999 }), Leap0Error);
 });
 
 test("sandboxes get pause and delete target sandbox ids", async () => {

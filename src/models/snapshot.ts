@@ -9,8 +9,8 @@ export const snapshotDataSchema = z
     name: z.string(),
     templateId: z.string(),
     vcpu: z.number(),
-    memoryMib: z.number(),
-    diskMib: z.number(),
+    memory: z.number(),
+    disk: z.number(),
     state: sandboxStateSchema.nullish(),
     networkPolicy: networkPolicySchema.optional(),
     createdAt: z.string(),
@@ -47,7 +47,7 @@ export type ListSnapshotsResponse = z.infer<typeof listSnapshotsResponseSchema>;
 export const resumeSnapshotParamsSchema = z.object({
   snapshotName: snapshotNameSchema,
   autoPause: z.boolean().optional(),
-  timeoutMin: z.number().int().min(1).max(480).optional(),
+  timeout: z.number().int().min(1).max(28800).optional(),
   networkPolicy: networkPolicySchema.optional(),
 });
 /** Parameters accepted when resuming a snapshot into a new sandbox. */

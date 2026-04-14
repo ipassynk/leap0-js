@@ -94,7 +94,7 @@ export class SandboxesClient<T = SandboxData> {
    * ```ts
    * const sandbox = await client.sandboxes.create({
    *   templateName: "base",
-   *   timeoutMin: 30,
+   *   timeout: 1800,
    * });
    * ```
    */
@@ -109,8 +109,8 @@ export class SandboxesClient<T = SandboxData> {
     const payload = {
       template_name: normalizedParams.templateName,
       vcpu: normalizedParams.vcpu,
-      memory_mib: normalizedParams.memoryMib,
-      timeout_min: normalizedParams.timeoutMin,
+      memory: normalizedParams.memory,
+      timeout: normalizedParams.timeout,
       auto_pause: normalizedParams.autoPause ?? false,
       env_vars: injectOtelEnv(normalizedParams.envVars, effectiveOtelExport),
       network_policy: toNetworkPolicyWire(normalizedParams.networkPolicy),

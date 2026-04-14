@@ -134,7 +134,7 @@ export class SnapshotsClient<T = SandboxData> {
           body: jsonBody({
             snapshot_name: parsed.snapshotName,
             auto_pause: parsed.autoPause,
-            timeout_min: parsed.timeoutMin,
+            timeout: parsed.timeout,
             network_policy: toNetworkPolicyWire(parsed.networkPolicy),
           }),
         },

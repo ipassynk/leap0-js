@@ -14,8 +14,9 @@ test("snapshots client sends expected request shapes", async () => {
           state: "running",
           template_id: "tpl-1",
           vcpu: 2,
-          memory_mib: 1024,
-          disk_mib: 4096,
+          memory: 1024,
+          disk: 4096,
+          timeout: 12,
           auto_pause: true,
           created_at: "2026-01-01T00:00:00Z",
         };
@@ -25,8 +26,8 @@ test("snapshots client sends expected request shapes", async () => {
         name: path.endsWith("/pause") ? "snap-b" : "snap-a",
         template_id: "tpl-1",
         vcpu: 2,
-        memory_mib: 1024,
-        disk_mib: 4096,
+        memory: 1024,
+        disk: 4096,
         created_at: "2026-01-01T00:00:00Z",
       };
     },
@@ -34,13 +35,13 @@ test("snapshots client sends expected request shapes", async () => {
   const client = new SnapshotsClient(transport as never);
   const created = await client.create("sb-1", { name: "snap-a" });
   const paused = await client.pause("sb-1", { name: "snap-b" });
-  const restored = await client.resume({ snapshotName: "snap-c", autoPause: true, timeoutMin: 12 });
+  const restored = await client.resume({ snapshotName: "snap-c", autoPause: true, timeout: 12 });
   await client.delete({ id: "snap-1" });
   assert.equal(created.name, "snap-a");
   assert.equal(created.templateId, "tpl-1");
   assert.equal(created.state, undefined);
   assert.equal(paused.name, "snap-b");
-  assert.equal(paused.memoryMib, 1024);
+  assert.equal(paused.memory, 1024);
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/snapshot/create");
   assert.deepEqual(jsonOf(calls[0]!), { name: "snap-a" });
   assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/snapshot/pause");
@@ -48,7 +49,7 @@ test("snapshots client sends expected request shapes", async () => {
   assert.deepEqual(jsonOf(calls[2]!), {
     snapshot_name: "snap-c",
     auto_pause: true,
-    timeout_min: 12,
+    timeout: 12,
   });
   assert.equal(restored.templateId, "tpl-1");
   assert.equal(calls[3]?.path, "/v1/snapshot/snap-1");
@@ -62,7 +63,7 @@ test("snapshots client validates snapshot names before transport", async () => {
   await assert.rejects(() => client.create("sb-1", { name: "   " }));
   await assert.rejects(() => client.resume({ snapshotName: "" }));
   await assert.rejects(() => client.resume({ snapshotName: "   " }));
-  await assert.rejects(() => client.resume({ snapshotName: "snap-a", timeoutMin: 999 }));
+  await assert.rejects(() => client.resume({ snapshotName: "snap-a", timeout: 99999 }));
   assert.equal(calls.length, 0);
 });
 
@@ -77,8 +78,8 @@ test("snapshots client lists snapshots with query params", async () => {
             name: "snap-a",
             template_id: "tpl-1",
             vcpu: 2,
-            memory_mib: 1024,
-            disk_mib: 4096,
+            memory: 1024,
+            disk: 4096,
             created_at: "2026-01-01T00:00:00Z",
           },
         ],

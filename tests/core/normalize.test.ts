@@ -8,7 +8,7 @@ test("camelizeKeys converts nested API response keys", () => {
   const bytes = new Uint8Array([1, 2, 3]);
   const result = camelizeKeys({
     template_id: "tpl-1",
-    memory_mib: 1024,
+    memory: 1024,
     network_policy: {
       allow_domains: ["example.com"],
       transforms: [{ inject_headers: { authorization: "token" }, strip_headers: ["cookie"] }],
@@ -20,7 +20,7 @@ test("camelizeKeys converts nested API response keys", () => {
 
   assert.deepEqual(result, {
     templateId: "tpl-1",
-    memoryMib: 1024,
+    memory: 1024,
     networkPolicy: {
       allowDomains: ["example.com"],
       transforms: [{ injectHeaders: { authorization: "token" }, stripHeaders: ["cookie"] }],
