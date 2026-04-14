@@ -3,7 +3,7 @@ import { expectTypeOf, test } from "vitest";
 
 import { Leap0Client, Sandbox } from "@/client/index.js";
 import { SERVICES } from "@/client/sandbox.js";
-import type { RequestOptions } from "@/models/index.js";
+import type { PresignedUrl, RequestOptions } from "@/models/index.js";
 
 test("Leap0Client wires services and supports direct access", async () => {
   const originalApiKey = process.env.LEAP0_API_KEY;
@@ -86,6 +86,16 @@ test("Sandbox binds service methods to itself", async () => {
         createdAt: "2026-01-01T00:00:00Z",
       }),
       delete: async () => undefined,
+      createPresignedUrl: async () => ({
+        id: "psu-1",
+        token: "tok_1",
+        url: "https://tok_1.leap0.app",
+        sandboxId: "sb-1",
+        port: 8080,
+        expiresAt: "2026-01-01T00:15:00Z",
+        createdAt: "2026-01-01T00:00:00Z",
+      }),
+      deletePresignedUrl: async () => undefined,
       getUserHomeDir: async (id: string) => `home:${id}`,
       getWorkdir: async (id: string) => `workdir:${id}`,
       invokeUrl: (id: string, path: string, port?: number) => `invoke:${id}:${path}:${port ?? ""}`,
@@ -124,6 +134,8 @@ test("Sandbox binds service methods to itself", async () => {
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
   assert.equal(await sandbox.getUserHomeDir(), "home:sb-1");
   assert.equal(await sandbox.getWorkdir(), "workdir:sb-1");
+  assert.equal((await sandbox.createPresignedUrl(8080, 15)).url, "https://tok_1.leap0.app");
+  await sandbox.deletePresignedUrl("psu-1");
 });
 
 test("Sandbox refresh rejects invalid sandbox states", async () => {
@@ -180,10 +192,17 @@ test("client and sandbox helpers stay strongly typed", () => {
     [params: { command: string; cwd?: string; timeout?: number; env?: Record<string, string> }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
-    [accessId: string, password: string, options?: RequestOptions]
+    [id: string, password: string, options?: RequestOptions]
+  >();
+  expectTypeOf<Sandbox["ssh"]["deleteAccess"]>().parameters.toEqualTypeOf<
+    [id: string, options?: RequestOptions]
+  >();
+  expectTypeOf<Sandbox["ssh"]["regenerateAccess"]>().parameters.toEqualTypeOf<
+    [id: string, options?: RequestOptions]
   >();
   expectTypeOf<ReturnType<Sandbox["getUserHomeDir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();
+  expectTypeOf<ReturnType<Sandbox["createPresignedUrl"]>>().toEqualTypeOf<Promise<PresignedUrl>>();
   expectTypeOf<Sandbox["templateName"]>().toEqualTypeOf<string | undefined>();
   expectTypeOf<Sandbox["timeoutMin"]>().toEqualTypeOf<number | undefined>();
   expectTypeOf<Sandbox["envVars"]>().toEqualTypeOf<Record<string, string> | undefined>();

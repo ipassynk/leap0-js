@@ -3,17 +3,21 @@ export type { RequestOptions } from "@/models/shared.js";
 export type { SandboxRef, SnapshotRef, TemplateRef } from "@/models/refs.js";
 
 export {
+  createPresignedUrlParamsSchema,
   createSandboxParamsSchema,
   listSandboxesParamsSchema,
   listSandboxesResponseSchema,
   NetworkPolicyMode,
+  presignedUrlSchema,
   SandboxState,
 } from "@/models/sandbox.js";
 export type {
+  CreatePresignedUrlParams,
   CreateSandboxParams,
   ListSandboxesParams,
   ListSandboxesResponse,
   NetworkPolicy,
+  PresignedUrl,
   SandboxData,
   SandboxListItem,
 } from "@/models/sandbox.js";

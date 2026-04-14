@@ -29,52 +29,54 @@ export class SshClient {
   }
 
   /**
-   * Deletes the active SSH credentials for a sandbox.
+   * Deletes a specific SSH credential for a sandbox.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
+   * @param id The SSH credential ID to delete.
    * @param options Optional request settings such as timeout and query params.
    */
-  async deleteAccess(sandbox: SandboxRef, options: RequestOptions = {}): Promise<void> {
+  async deleteAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<void> {
     await this.transport.request(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/access`,
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}`,
       { method: "DELETE" },
       options,
     );
   }
 
   /**
-   * Verifies a previously issued SSH credential pair.
+   * Verifies a specific previously issued SSH credential pair.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param accessId The SSH access ID to validate.
+   * @param id The SSH credential ID to validate.
    * @param password The password returned when the access credential was created.
    * @param options Optional request settings such as timeout and query params.
    * @returns The validation result.
    */
   async validateAccess(
     sandbox: SandboxRef,
-    accessId: string,
+    id: string,
     password: string,
     options: RequestOptions = {},
   ): Promise<SshValidation> {
     const data = await this.transport.requestJson<SshValidation>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/validate`,
-      { method: "POST", body: jsonBody({ id: accessId, password }) },
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}/validate`,
+      { method: "POST", body: jsonBody({ password }) },
       options,
     );
     return normalize(sshValidationSchema, data);
   }
 
   /**
-   * Rotates SSH credentials for a sandbox.
+   * Rotates a specific SSH credential for a sandbox.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
+   * @param id The SSH credential ID to rotate.
    * @param options Optional request settings such as timeout and query params.
    * @returns The newly generated SSH access payload.
    */
-  async regenerateAccess(sandbox: SandboxRef, options: RequestOptions = {}): Promise<SshAccess> {
+  async regenerateAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<SshAccess> {
     const data = await this.transport.requestJson<SshAccess>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/regen`,
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}/regen`,
       { method: "POST" },
       options,
     );

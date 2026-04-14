@@ -158,6 +158,25 @@ export const listSandboxesResponseSchema = z
 /** Paginated sandbox list response. */
 export type ListSandboxesResponse = z.infer<typeof listSandboxesResponseSchema>;
 
+export const createPresignedUrlParamsSchema = z.object({
+  port: z.number().int().min(1).max(65535),
+  expiresIn: z.number().int().min(1).optional(),
+});
+export type CreatePresignedUrlParams = z.infer<typeof createPresignedUrlParamsSchema>;
+
+export const presignedUrlSchema = z
+  .object({
+    id: z.string(),
+    token: z.string(),
+    url: z.string().url(),
+    sandboxId: z.string(),
+    port: z.number().int().min(1).max(65535),
+    expiresAt: z.string(),
+    createdAt: z.string(),
+  })
+  .catchall(z.unknown());
+export type PresignedUrl = z.infer<typeof presignedUrlSchema>;
+
 export const listSandboxesParamsSchema = z
   .object({
     state: z

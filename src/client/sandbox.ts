@@ -1,4 +1,4 @@
-import type { SandboxData, SandboxState } from "@/models/index.js";
+import type { PresignedUrl, SandboxData, SandboxState } from "@/models/index.js";
 import { sandboxStateSchema } from "@/models/sandbox.js";
 import {
   CodeInterpreterClient,
@@ -207,6 +207,24 @@ export class Sandbox implements SandboxData {
    */
   async delete(options?: { timeout?: number }): Promise<void> {
     await this.client.sandboxes.delete(this.id, options);
+  }
+
+  /**
+   * Creates a temporary public URL for a specific sandbox port.
+   */
+  async createPresignedUrl(
+    port: number,
+    expiresIn?: number,
+    options?: { timeout?: number },
+  ): Promise<PresignedUrl> {
+    return this.client.sandboxes.createPresignedUrl(this.id, { port, expiresIn }, options);
+  }
+
+  /**
+   * Deletes a previously issued presigned URL.
+   */
+  async deletePresignedUrl(id: string, options?: { timeout?: number }): Promise<void> {
+    await this.client.sandboxes.deletePresignedUrl(this.id, id, options);
   }
 
   /**

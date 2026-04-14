@@ -2,16 +2,20 @@ import { OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_HEADERS } from "@/confi
 import { Leap0Error } from "@/core/errors.js";
 import { normalize } from "@/core/normalize.js";
 import {
+  createPresignedUrlParamsSchema,
   createSandboxRuntimeParamsSchema,
   listSandboxesParamsSchema,
   listSandboxesResponseSchema,
+  presignedUrlSchema,
   sandboxDataSchema,
   toNetworkPolicyWire,
 } from "@/models/sandbox.js";
 import type {
+  CreatePresignedUrlParams,
   CreateSandboxParams,
   ListSandboxesParams,
   ListSandboxesResponse,
+  PresignedUrl,
   RequestOptions,
   SandboxData,
   SandboxRef,
@@ -250,6 +254,52 @@ export class SandboxesClient<T = SandboxData> {
       }
       return (data as { workdir: string }).workdir;
     });
+  }
+
+  /**
+   * Creates a temporary public URL for a specific sandbox port.
+   */
+  async createPresignedUrl(
+    sandbox: SandboxRef,
+    params: CreatePresignedUrlParams,
+    options: RequestOptions = {},
+  ): Promise<PresignedUrl> {
+    const parsed = createPresignedUrlParamsSchema.parse(params);
+    return withErrorPrefix("Failed to create presigned URL: ", async () => {
+      const data = await this.transport.requestJson<unknown>(
+        `/v1/sandbox/${sandboxIdOf(sandbox)}/presigned-url`,
+        {
+          method: "POST",
+          body: jsonBody({
+            port: parsed.port,
+            expires_in: parsed.expiresIn,
+          }),
+        },
+        options,
+      );
+      return normalize(presignedUrlSchema, data);
+    });
+  }
+
+  /**
+   * Deletes a previously issued presigned URL.
+   */
+  async deletePresignedUrl(
+    sandbox: SandboxRef,
+    id: string,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    const trimmedID = id.trim();
+    if (!trimmedID) {
+      throw new Leap0Error("id must be a non-empty string");
+    }
+    await withErrorPrefix("Failed to delete presigned URL: ", () =>
+      this.transport.request(
+	      `/v1/sandbox/${sandboxIdOf(sandbox)}/presigned-url/${trimmedID}`,
+        { method: "DELETE" },
+        options,
+      ),
+    );
   }
 
 
