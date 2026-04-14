@@ -192,7 +192,13 @@ test("client and sandbox helpers stay strongly typed", () => {
     [params: { command: string; cwd?: string; timeout?: number; env?: Record<string, string> }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
-    [accessId: string, password: string, options?: RequestOptions]
+    [id: string, password: string, options?: RequestOptions]
+  >();
+  expectTypeOf<Sandbox["ssh"]["deleteAccess"]>().parameters.toEqualTypeOf<
+    [id: string, options?: RequestOptions]
+  >();
+  expectTypeOf<Sandbox["ssh"]["regenerateAccess"]>().parameters.toEqualTypeOf<
+    [id: string, options?: RequestOptions]
   >();
   expectTypeOf<ReturnType<Sandbox["getUserHomeDir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();
