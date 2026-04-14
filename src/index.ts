@@ -16,6 +16,7 @@ export {
 
 export { Leap0Client, Sandbox } from "@/client/index.js";
 export {
+  createPresignedUrlParamsSchema,
   CodeLanguage,
   codeLanguageSchema,
   listSandboxesParamsSchema,
@@ -23,6 +24,7 @@ export {
   listSnapshotsParamsSchema,
   listSnapshotsResponseSchema,
   NetworkPolicyMode,
+  presignedUrlSchema,
   RegistryCredentialType,
   SandboxState,
   StreamEventType,
@@ -43,6 +45,7 @@ export {
 } from "@/services/index.js";
 
 export type {
+  CreatePresignedUrlParams,
   CodeContext,
   CodeExecutionError,
   CodeExecutionOutput,
@@ -80,6 +83,7 @@ export type {
   LsResult,
   NetworkPolicy,
   ProcessResult,
+  PresignedUrl,
   PtySession,
   ResumeSnapshotParams,
   SandboxListItem,

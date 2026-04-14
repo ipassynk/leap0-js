@@ -115,6 +115,40 @@ test("sandboxes runtime info rejects non-object responses", async () => {
   await assert.rejects(() => client.getWorkdir("sb-1"), /missing workdir/);
 });
 
+test("sandboxes create and delete presigned urls", async () => {
+  const { transport, calls } = createRecordedTransport({
+    requestJson: (path: string, init: RequestInit, options: unknown) => {
+      calls.push({ path, init, options: options as never });
+      return Promise.resolve({
+        id: "psu_1",
+        token: "tok_1",
+        url: "https://tok_1.leap0.app",
+        host: "tok_1.leap0.app",
+        sandbox_id: "sb-1",
+        port: 8080,
+        expires_at: "2026-01-01T00:15:00Z",
+        created_at: "2026-01-01T00:00:00Z",
+      });
+    },
+    request: (path: string, init: RequestInit, options: unknown) => {
+      calls.push({ path, init, options: options as never });
+      return Promise.resolve(new Response(null, { status: 204 }));
+    },
+  });
+  const client = new SandboxesClient(transport as never);
+
+  const created = await client.createPresignedUrl("sb-1", { port: 8080, expiresIn: 900 });
+  await client.deletePresignedUrl("sb-1", created.id);
+
+  assert.equal(created.url, "https://tok_1.leap0.app");
+  assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/presigned-url");
+  assert.deepEqual(jsonOf(calls[0]!) as { port: number; expires_in_minutes: number }, {
+    port: 8080,
+    expires_in: 900,
+  });
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/presigned-url/psu_1");
+});
+
 
 test("sandboxes list sends query params and normalizes response", async () => {
   const { transport, calls } = createRecordedTransport({
