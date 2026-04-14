@@ -86,6 +86,8 @@ test("Sandbox binds service methods to itself", async () => {
         createdAt: "2026-01-01T00:00:00Z",
       }),
       delete: async () => undefined,
+      getUserHomeDir: async (id: string) => `home:${id}`,
+      getWorkdir: async (id: string) => `workdir:${id}`,
       invokeUrl: (id: string, path: string, port?: number) => `invoke:${id}:${path}:${port ?? ""}`,
       websocketUrl: (id: string, path: string, port?: number) => `ws:${id}:${path}:${port ?? ""}`,
     },
@@ -120,6 +122,8 @@ test("Sandbox binds service methods to itself", async () => {
   await sandbox.pause();
   assert.equal(sandbox.state, "paused");
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
+  assert.equal(await sandbox.getUserHomeDir(), "home:sb-1");
+  assert.equal(await sandbox.getWorkdir(), "workdir:sb-1");
 });
 
 test("Sandbox refresh rejects invalid sandbox states", async () => {
@@ -178,6 +182,8 @@ test("client and sandbox helpers stay strongly typed", () => {
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
     [accessId: string, password: string, options?: RequestOptions]
   >();
+  expectTypeOf<ReturnType<Sandbox["getUserHomeDir"]>>().toEqualTypeOf<Promise<string>>();
+  expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<Sandbox["templateName"]>().toEqualTypeOf<string | undefined>();
   expectTypeOf<Sandbox["timeoutMin"]>().toEqualTypeOf<number | undefined>();
   expectTypeOf<Sandbox["envVars"]>().toEqualTypeOf<Record<string, string> | undefined>();

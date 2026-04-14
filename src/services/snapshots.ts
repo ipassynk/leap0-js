@@ -1,5 +1,7 @@
 import type {
   CreateSnapshotParams,
+  ListSnapshotsParams,
+  ListSnapshotsResponse,
   RequestOptions,
   ResumeSnapshotParams,
   SandboxData,
@@ -10,6 +12,8 @@ import type {
 import { normalize } from "@/core/normalize.js";
 import {
   createSnapshotParamsSchema,
+  listSnapshotsParamsSchema,
+  listSnapshotsResponseSchema,
   resumeSnapshotParamsSchema,
   snapshotDataSchema,
 } from "@/models/snapshot.js";
@@ -31,6 +35,38 @@ export class SnapshotsClient<T = SandboxData> {
 
   private wrap(data: SandboxData): T {
     return (this.sandboxFactory ? this.sandboxFactory(data) : data) as T;
+  }
+
+  /**
+   * Lists snapshots for the authenticated organization.
+   *
+   * @param params Optional filter, sort, and pagination parameters.
+   * @param options Optional request settings such as timeout and headers.
+   * @returns Paginated snapshot summaries.
+   */
+  async list(
+    params: ListSnapshotsParams = {},
+    options: RequestOptions = {},
+  ): Promise<ListSnapshotsResponse> {
+    return withErrorPrefix("Failed to list snapshots: ", async () => {
+      const parsed = listSnapshotsParamsSchema.parse(params);
+      const data = await this.transport.requestJson<unknown>(
+        "/v1/snapshots",
+        { method: "GET" },
+        {
+          ...options,
+          query: {
+            ...options.query,
+            query: parsed.query,
+            sort: parsed.sort,
+            "order-by": parsed.orderBy,
+            page: parsed.page,
+            "page-size": parsed.pageSize,
+          },
+        },
+      );
+      return normalize(listSnapshotsResponseSchema, data);
+    });
   }
 
   /**

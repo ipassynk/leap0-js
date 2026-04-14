@@ -135,6 +135,51 @@ export const sandboxDataSchema = z
 /** Sandbox resource returned by the control plane API. */
 export type SandboxData = z.infer<typeof sandboxDataSchema>;
 
+export const sandboxListItemSchema = z
+  .object({
+    id: z.string(),
+    templateId: z.string(),
+    podId: z.string(),
+    state: sandboxStateSchema,
+    launchTime: z.string().optional(),
+    stateChangeTime: z.string().optional(),
+    timeoutAt: z.number().optional(),
+    createdAt: z.string(),
+  })
+  .catchall(z.unknown());
+/** Sandbox summary returned by the list sandboxes API. */
+export type SandboxListItem = z.infer<typeof sandboxListItemSchema>;
+
+export const listSandboxesResponseSchema = z
+  .object({
+    items: z.array(sandboxListItemSchema),
+    totalItems: z.number().int().nonnegative(),
+  })
+  .catchall(z.unknown());
+/** Paginated sandbox list response. */
+export type ListSandboxesResponse = z.infer<typeof listSandboxesResponseSchema>;
+
+export const listSandboxesParamsSchema = z
+  .object({
+    state: z
+      .enum([
+        SandboxState.STARTING,
+        SandboxState.SNAPSHOTTING,
+        SandboxState.RUNNING,
+        SandboxState.PAUSED,
+        SandboxState.UNPAUSING,
+        SandboxState.DELETING,
+      ])
+      .optional(),
+    sort: z.enum(["created_at", "state"]).optional(),
+    orderBy: z.enum(["asc", "desc"]).optional(),
+    page: z.number().int().min(1).optional(),
+    pageSize: z.number().int().min(1).max(100).optional(),
+  })
+  .passthrough();
+/** Parameters accepted when listing sandboxes. */
+export type ListSandboxesParams = z.infer<typeof listSandboxesParamsSchema>;
+
 export const createSandboxParamsSchema = z.object({
   templateName: z.string().optional(),
   vcpu: z.number().int().positive().optional(),

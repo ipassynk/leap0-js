@@ -82,6 +82,85 @@ test("sandboxes get pause and delete target sandbox ids", async () => {
   assert.equal(calls[2]?.path, "/v1/sandbox/sb-3/");
 });
 
+test("sandboxes runtime info targets system endpoints", async () => {
+  const { transport, calls } = createRecordedTransport({
+    requestJson: (path: string, init: RequestInit, options: unknown) => {
+      calls.push({ path, init, options: options as never });
+      if (path.endsWith("/user-home-dir")) {
+        return Promise.resolve({ user_home_dir: "/home/steven" });
+      }
+      return Promise.resolve({ workdir: "/home/steve/agent" });
+    },
+  });
+  const client = new SandboxesClient(transport as never);
+
+  assert.equal(await client.getUserHomeDir("sb-1"), "/home/steven");
+  assert.equal(await client.getWorkdir("sb-1"), "/home/steve/agent");
+  assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/system/user-home-dir");
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/system/workdir");
+});
+
+test("sandboxes runtime info rejects non-object responses", async () => {
+  const { transport } = createRecordedTransport({
+    requestJson: (path: string) => {
+      if (path.endsWith("/user-home-dir")) {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve("/tmp");
+    },
+  });
+  const client = new SandboxesClient(transport as never);
+
+  await assert.rejects(() => client.getUserHomeDir("sb-1"), /missing user_home_dir/);
+  await assert.rejects(() => client.getWorkdir("sb-1"), /missing workdir/);
+});
+
+
+test("sandboxes list sends query params and normalizes response", async () => {
+  const { transport, calls } = createRecordedTransport({
+    requestJson: (path: string, init: RequestInit, options: unknown) => {
+      calls.push({ path, init, options: options as never });
+      return Promise.resolve({
+        items: [
+          {
+            id: "sb-1",
+            template_id: "tpl-1",
+            pod_id: "pod-1",
+            state: "running",
+            launch_time: "2026-01-01T00:00:05Z",
+            state_change_time: "2026-01-01T00:00:10Z",
+            timeout_at: 1735689900,
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        ],
+        total_items: 1,
+      });
+    },
+  });
+  const client = new SandboxesClient(transport as never);
+
+  const result = await client.list({
+    state: "running",
+    sort: "state",
+    orderBy: "asc",
+    page: 2,
+    pageSize: 10,
+  });
+
+  assert.equal(calls[0]?.path, "/v1/sandboxes");
+  assert.deepEqual(calls[0]?.options.query, {
+    state: "running",
+    sort: "state",
+    "order-by": "asc",
+    page: 2,
+    "page-size": 10,
+  });
+  assert.equal(result.totalItems, 1);
+  assert.equal(result.items[0]?.templateId, "tpl-1");
+  assert.equal(result.items[0]?.podId, "pod-1");
+  assert.equal(result.items[0]?.launchTime, "2026-01-01T00:00:05Z");
+});
+
 test("sandboxes build invoke and websocket urls", () => {
   const { client } = makeClient();
   assert.equal(client.invokeUrl("sb-1", "healthz"), "https://sb-1.sandbox.example.com/healthz");

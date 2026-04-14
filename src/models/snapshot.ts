@@ -25,6 +25,25 @@ export const createSnapshotParamsSchema = z.object({
 /** Parameters accepted when creating or naming a snapshot. */
 export type CreateSnapshotParams = z.infer<typeof createSnapshotParamsSchema>;
 
+export const listSnapshotsParamsSchema = z.object({
+  query: z.string().max(64).optional(),
+  sort: z.enum(["created_at", "template_id"]).optional(),
+  orderBy: z.enum(["asc", "desc"]).optional(),
+  page: z.number().int().min(1).optional(),
+  pageSize: z.number().int().min(1).max(100).optional(),
+});
+/** Parameters accepted when listing snapshots. */
+export type ListSnapshotsParams = z.infer<typeof listSnapshotsParamsSchema>;
+
+export const listSnapshotsResponseSchema = z
+  .object({
+    items: z.array(snapshotDataSchema),
+    totalItems: z.number().int().nonnegative(),
+  })
+  .catchall(z.unknown());
+/** Paginated snapshot list response. */
+export type ListSnapshotsResponse = z.infer<typeof listSnapshotsResponseSchema>;
+
 export const resumeSnapshotParamsSchema = z.object({
   snapshotName: snapshotNameSchema,
   autoPause: z.boolean().optional(),
