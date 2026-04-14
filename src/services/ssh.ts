@@ -36,8 +36,9 @@ export class SshClient {
    * @param options Optional request settings such as timeout and query params.
    */
   async deleteAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<void> {
+    const encodedID = encodeURIComponent(id);
     await this.transport.request(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}`,
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}`,
       { method: "DELETE" },
       options,
     );
@@ -58,8 +59,9 @@ export class SshClient {
     password: string,
     options: RequestOptions = {},
   ): Promise<SshValidation> {
+    const encodedID = encodeURIComponent(id);
     const data = await this.transport.requestJson<SshValidation>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}/validate`,
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}/validate`,
       { method: "POST", body: jsonBody({ password }) },
       options,
     );
@@ -75,8 +77,9 @@ export class SshClient {
    * @returns The newly generated SSH access payload.
    */
   async regenerateAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<SshAccess> {
+    const encodedID = encodeURIComponent(id);
     const data = await this.transport.requestJson<SshAccess>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}/regen`,
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}/regen`,
       { method: "POST" },
       options,
     );
