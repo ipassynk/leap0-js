@@ -16,8 +16,8 @@ test("Leap0Client wires services and supports direct access", async () => {
     templateId: "tpl-1",
     state: "running",
     vcpu: 1,
-    memoryMib: 1024,
-    diskMib: 4096,
+    memory: 1024,
+    disk: 4096,
     autoPause: false,
     createdAt: "2026-01-01T00:00:00Z",
   })) as never;
@@ -26,8 +26,8 @@ test("Leap0Client wires services and supports direct access", async () => {
     templateId: "tpl-1",
     state: "starting",
     vcpu: 1,
-    memoryMib: 1024,
-    diskMib: 4096,
+    memory: 1024,
+    disk: 4096,
     autoPause: false,
     createdAt: "2026-01-01T00:00:00Z",
   })) as never;
@@ -58,8 +58,8 @@ test("Sandbox binds service methods to itself", async () => {
             templateId: "tpl-1",
             state: "running",
             vcpu: 2,
-            memoryMib: 2048,
-            diskMib: 4096,
+            memory: 2048,
+            disk: 4096,
             autoPause: false,
             createdAt: "2026-01-01T00:00:00Z",
           });
@@ -69,8 +69,8 @@ test("Sandbox binds service methods to itself", async () => {
           templateId: "tpl-1",
           state: "running",
           vcpu: 2,
-          memoryMib: 2048,
-          diskMib: 4096,
+          memory: 2048,
+          disk: 4096,
           autoPause: false,
           createdAt: "2026-01-01T00:00:00Z",
         };
@@ -80,8 +80,8 @@ test("Sandbox binds service methods to itself", async () => {
         templateId: "tpl-1",
         state: "paused",
         vcpu: 1,
-        memoryMib: 1024,
-        diskMib: 4096,
+        memory: 1024,
+        disk: 4096,
         autoPause: false,
         createdAt: "2026-01-01T00:00:00Z",
       }),
@@ -119,8 +119,8 @@ test("Sandbox binds service methods to itself", async () => {
     templateId: "tpl-1",
     state: "running",
     vcpu: 1,
-    memoryMib: 1024,
-    diskMib: 4096,
+    memory: 1024,
+    disk: 4096,
     autoPause: false,
     createdAt: "2026-01-01T00:00:00Z",
   });
@@ -128,7 +128,7 @@ test("Sandbox binds service methods to itself", async () => {
   assert.equal(sandbox.vcpu, 1);
   await sandbox.refresh();
   assert.equal(sandbox.vcpu, 2);
-  assert.equal(sandbox.memoryMib, 2048);
+  assert.equal(sandbox.memory, 2048);
   await sandbox.pause();
   assert.equal(sandbox.state, "paused");
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
@@ -147,8 +147,8 @@ test("Sandbox refresh rejects invalid sandbox states", async () => {
           templateId: "tpl-1",
           state: "not-real",
           vcpu: 1,
-          memoryMib: 1024,
-          diskMib: 4096,
+          memory: 1024,
+          disk: 4096,
           createdAt: "2026-01-01T00:00:00Z",
         }),
       },
@@ -168,8 +168,8 @@ test("Sandbox refresh rejects invalid sandbox states", async () => {
       templateId: "tpl-1",
       state: "running",
       vcpu: 1,
-      memoryMib: 1024,
-      diskMib: 4096,
+      memory: 1024,
+      disk: 4096,
       createdAt: "2026-01-01T00:00:00Z",
     },
   );
@@ -204,7 +204,7 @@ test("client and sandbox helpers stay strongly typed", () => {
   expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<ReturnType<Sandbox["createPresignedUrl"]>>().toEqualTypeOf<Promise<PresignedUrl>>();
   expectTypeOf<Sandbox["templateName"]>().toEqualTypeOf<string | undefined>();
-  expectTypeOf<Sandbox["timeoutMin"]>().toEqualTypeOf<number | undefined>();
+  expectTypeOf<Sandbox["timeout"]>().toEqualTypeOf<number | undefined>();
   expectTypeOf<Sandbox["envVars"]>().toEqualTypeOf<Record<string, string> | undefined>();
   expectTypeOf<Sandbox["updatedAt"]>().toEqualTypeOf<string | undefined>();
 });

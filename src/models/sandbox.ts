@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   DEFAULT_MEMORY_MIB,
   DEFAULT_TEMPLATE_NAME,
-  DEFAULT_TIMEOUT_MIN,
+  DEFAULT_TIMEOUT,
   DEFAULT_VCPU,
 } from "@/config/constants.js";
 
@@ -122,9 +122,9 @@ export const sandboxDataSchema = z
     templateName: z.string().optional(),
     state: sandboxStateSchema,
     vcpu: z.number(),
-    memoryMib: z.number(),
-    diskMib: z.number(),
-    timeoutMin: z.number().optional(),
+    memory: z.number(),
+    disk: z.number(),
+    timeout: z.number().optional(),
     autoPause: z.boolean().optional(),
     envVars: z.record(z.string(), z.string()).optional(),
     networkPolicy: networkPolicySchema.optional(),
@@ -201,8 +201,8 @@ export type ListSandboxesParams = z.infer<typeof listSandboxesParamsSchema>;
 export const createSandboxParamsSchema = z.object({
   templateName: z.string().optional(),
   vcpu: z.number().int().positive().optional(),
-  memoryMib: z.number().int().positive().optional(),
-  timeoutMin: z.number().int().positive().optional(),
+  memory: z.number().int().positive().optional(),
+  timeout: z.number().int().positive().optional(),
   autoPause: z.boolean().optional(),
   otelExport: z.boolean().optional(),
   telemetry: z.boolean().optional(),
@@ -231,24 +231,24 @@ export const createSandboxRuntimeParamsSchema = z
           .min(1, "vcpu must be between 1 and 8")
           .max(8, "vcpu must be between 1 and 8"),
       ),
-      memoryMib: z.preprocess(
+      memory: z.preprocess(
         (value) => value ?? DEFAULT_MEMORY_MIB,
         z
-          .number({ invalid_type_error: "memoryMib must be even and between 512 and 8192" })
-          .int("memoryMib must be even and between 512 and 8192")
-          .min(512, "memoryMib must be even and between 512 and 8192")
-          .max(8192, "memoryMib must be even and between 512 and 8192")
+          .number({ invalid_type_error: "memory must be even and between 512 and 8192" })
+          .int("memory must be even and between 512 and 8192")
+          .min(512, "memory must be even and between 512 and 8192")
+          .max(8192, "memory must be even and between 512 and 8192")
           .refine((value) => value % 2 === 0, {
-            message: "memoryMib must be even and between 512 and 8192",
+            message: "memory must be even and between 512 and 8192",
           }),
       ),
-      timeoutMin: z.preprocess(
-        (value) => value ?? DEFAULT_TIMEOUT_MIN,
+      timeout: z.preprocess(
+        (value) => value ?? DEFAULT_TIMEOUT,
         z
-          .number({ invalid_type_error: "timeoutMin must be between 1 and 480" })
-          .int("timeoutMin must be between 1 and 480")
-          .min(1, "timeoutMin must be between 1 and 480")
-          .max(480, "timeoutMin must be between 1 and 480"),
+          .number({ invalid_type_error: "timeout must be between 1 and 28800" })
+          .int("timeout must be between 1 and 28800")
+          .min(1, "timeout must be between 1 and 28800")
+          .max(28800, "timeout must be between 1 and 28800"),
       ),
       autoPause: z.boolean().optional(),
       otelExport: z.boolean().optional(),

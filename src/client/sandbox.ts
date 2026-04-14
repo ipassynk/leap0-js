@@ -26,8 +26,8 @@ function isSandboxData(value: unknown): value is SandboxData {
     typeof record.templateId === "string" &&
     sandboxStateSchema.safeParse(record.state).success &&
     typeof record.vcpu === "number" &&
-    typeof record.memoryMib === "number" &&
-    typeof record.diskMib === "number" &&
+    typeof record.memory === "number" &&
+    typeof record.disk === "number" &&
     typeof record.createdAt === "string"
   );
 }
@@ -98,11 +98,11 @@ export class Sandbox implements SandboxData {
   /** Number of virtual CPUs assigned to the sandbox. */
   vcpu!: number;
   /** Allocated memory in MiB. */
-  memoryMib!: number;
+  memory!: number;
   /** Allocated disk in MiB. */
-  diskMib!: number;
+  disk!: number;
   /** Auto-shutdown timeout in minutes, when configured. */
-  timeoutMin?: number;
+  timeout?: number;
   /** Whether the sandbox automatically pauses when idle. */
   autoPause?: boolean;
   /** Environment variables configured for the sandbox. */
@@ -161,9 +161,9 @@ export class Sandbox implements SandboxData {
     this.templateName = data.templateName;
     this.state = data.state;
     this.vcpu = data.vcpu;
-    this.memoryMib = data.memoryMib;
-    this.diskMib = data.diskMib;
-    this.timeoutMin = data.timeoutMin;
+    this.memory = data.memory;
+    this.disk = data.disk;
+    this.timeout = data.timeout;
     this.autoPause = data.autoPause;
     this.envVars = data.envVars;
     this.networkPolicy = data.networkPolicy;
@@ -211,6 +211,11 @@ export class Sandbox implements SandboxData {
 
   /**
    * Creates a temporary public URL for a specific sandbox port.
+   *
+   * @param port Sandbox port to expose.
+   * @param expiresIn Optional expiration in seconds.
+   * @param options Optional request settings.
+   * @returns The created presigned URL.
    */
   async createPresignedUrl(
     port: number,
@@ -222,6 +227,9 @@ export class Sandbox implements SandboxData {
 
   /**
    * Deletes a previously issued presigned URL.
+   *
+   * @param id Presigned URL identifier.
+   * @param options Optional request settings.
    */
   async deletePresignedUrl(id: string, options?: { timeout?: number }): Promise<void> {
     await this.client.sandboxes.deletePresignedUrl(this.id, id, options);
