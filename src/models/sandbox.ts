@@ -160,7 +160,7 @@ export type ListSandboxesResponse = z.infer<typeof listSandboxesResponseSchema>;
 
 export const createPresignedUrlParamsSchema = z.object({
   port: z.number().int().min(1).max(65535),
-  expiresIn: z.number().int().min(1).max(604800).optional(),
+  expiresIn: z.number().int().min(1).optional(),
 });
 export type CreatePresignedUrlParams = z.infer<typeof createPresignedUrlParamsSchema>;
 
@@ -169,7 +169,6 @@ export const presignedUrlSchema = z
     id: z.string(),
     token: z.string(),
     url: z.string().url(),
-    host: z.string(),
     sandboxId: z.string(),
     port: z.number().int().min(1).max(65535),
     expiresAt: z.string(),

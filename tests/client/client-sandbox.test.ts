@@ -87,10 +87,9 @@ test("Sandbox binds service methods to itself", async () => {
       }),
       delete: async () => undefined,
       createPresignedUrl: async () => ({
-        id: "psu_1",
+        id: "psu-1",
         token: "tok_1",
         url: "https://tok_1.leap0.app",
-        host: "tok_1.leap0.app",
         sandboxId: "sb-1",
         port: 8080,
         expiresAt: "2026-01-01T00:15:00Z",
@@ -135,8 +134,8 @@ test("Sandbox binds service methods to itself", async () => {
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
   assert.equal(await sandbox.getUserHomeDir(), "home:sb-1");
   assert.equal(await sandbox.getWorkdir(), "workdir:sb-1");
-  assert.equal((await sandbox.createPresignedUrl(8080, 15)).host, "tok_1.leap0.app");
-  await sandbox.deletePresignedUrl("psu_1");
+  assert.equal((await sandbox.createPresignedUrl(8080, 15)).url, "https://tok_1.leap0.app");
+  await sandbox.deletePresignedUrl("psu-1");
 });
 
 test("Sandbox refresh rejects invalid sandbox states", async () => {

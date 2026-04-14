@@ -120,10 +120,9 @@ test("sandboxes create and delete presigned urls", async () => {
     requestJson: (path: string, init: RequestInit, options: unknown) => {
       calls.push({ path, init, options: options as never });
       return Promise.resolve({
-        id: "psu_1",
+        id: "psu-1",
         token: "tok_1",
         url: "https://tok_1.leap0.app",
-        host: "tok_1.leap0.app",
         sandbox_id: "sb-1",
         port: 8080,
         expires_at: "2026-01-01T00:15:00Z",
@@ -146,7 +145,7 @@ test("sandboxes create and delete presigned urls", async () => {
     port: 8080,
     expires_in: 900,
   });
-  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/presigned-url/psu_1");
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/presigned-url/psu-1");
 });
 
 
