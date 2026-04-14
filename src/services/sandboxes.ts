@@ -293,10 +293,9 @@ export class SandboxesClient<T = SandboxData> {
     if (!trimmedID) {
       throw new Leap0Error("id must be a non-empty string");
     }
-    const encodedID = encodeURIComponent(trimmedID);
     await withErrorPrefix("Failed to delete presigned URL: ", () =>
       this.transport.request(
-	      `/v1/sandbox/${sandboxIdOf(sandbox)}/presigned-url/${encodedID}`,
+	      `/v1/sandbox/${sandboxIdOf(sandbox)}/presigned-url/${trimmedID}`,
         { method: "DELETE" },
         options,
       ),

@@ -12,6 +12,10 @@ import { sandboxIdOf } from "@/core/utils.js";
 export class SshClient {
   constructor(private readonly transport: Leap0Transport) {}
 
+  private sshCredentialPath(sandbox: SandboxRef, id: string): string {
+    return `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${id}`;
+  }
+
   /**
    * Creates SSH credentials for a sandbox.
    *
@@ -36,9 +40,8 @@ export class SshClient {
    * @param options Optional request settings such as timeout and query params.
    */
   async deleteAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<void> {
-    const encodedID = encodeURIComponent(id);
     await this.transport.request(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}`,
+      this.sshCredentialPath(sandbox, id),
       { method: "DELETE" },
       options,
     );
@@ -59,9 +62,8 @@ export class SshClient {
     password: string,
     options: RequestOptions = {},
   ): Promise<SshValidation> {
-    const encodedID = encodeURIComponent(id);
     const data = await this.transport.requestJson<SshValidation>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}/validate`,
+      `${this.sshCredentialPath(sandbox, id)}/validate`,
       { method: "POST", body: jsonBody({ password }) },
       options,
     );
@@ -77,9 +79,8 @@ export class SshClient {
    * @returns The newly generated SSH access payload.
    */
   async regenerateAccess(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<SshAccess> {
-    const encodedID = encodeURIComponent(id);
     const data = await this.transport.requestJson<SshAccess>(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/ssh/${encodedID}/regen`,
+      `${this.sshCredentialPath(sandbox, id)}/regen`,
       { method: "POST" },
       options,
     );
