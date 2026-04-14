@@ -139,7 +139,6 @@ export const sandboxListItemSchema = z
   .object({
     id: z.string(),
     templateId: z.string(),
-    podId: z.string(),
     state: sandboxStateSchema,
     launchTime: z.string().optional(),
     stateChangeTime: z.string().optional(),

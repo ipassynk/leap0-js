@@ -125,7 +125,6 @@ test("sandboxes list sends query params and normalizes response", async () => {
           {
             id: "sb-1",
             template_id: "tpl-1",
-            pod_id: "pod-1",
             state: "running",
             launch_time: "2026-01-01T00:00:05Z",
             state_change_time: "2026-01-01T00:00:10Z",
@@ -157,7 +156,6 @@ test("sandboxes list sends query params and normalizes response", async () => {
   });
   assert.equal(result.totalItems, 1);
   assert.equal(result.items[0]?.templateId, "tpl-1");
-  assert.equal(result.items[0]?.podId, "pod-1");
   assert.equal(result.items[0]?.launchTime, "2026-01-01T00:00:05Z");
 });
 
