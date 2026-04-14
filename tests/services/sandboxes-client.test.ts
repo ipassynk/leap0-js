@@ -120,7 +120,7 @@ test("sandboxes create and delete presigned urls", async () => {
     requestJson: (path: string, init: RequestInit, options: unknown) => {
       calls.push({ path, init, options: options as never });
       return Promise.resolve({
-        id: "psu-1",
+        id: "psu/1",
         token: "tok_1",
         url: "https://tok_1.leap0.app",
         sandbox_id: "sb-1",
@@ -141,11 +141,11 @@ test("sandboxes create and delete presigned urls", async () => {
 
   assert.equal(created.url, "https://tok_1.leap0.app");
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/presigned-url");
-  assert.deepEqual(jsonOf(calls[0]!) as { port: number; expires_in_minutes: number }, {
+  assert.deepEqual(jsonOf(calls[0]!) as { port: number; expires_in: number }, {
     port: 8080,
     expires_in: 900,
   });
-  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/presigned-url/psu-1");
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/presigned-url/psu%2F1");
 });
 
 

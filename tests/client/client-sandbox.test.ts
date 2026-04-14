@@ -3,7 +3,7 @@ import { expectTypeOf, test } from "vitest";
 
 import { Leap0Client, Sandbox } from "@/client/index.js";
 import { SERVICES } from "@/client/sandbox.js";
-import type { RequestOptions } from "@/models/index.js";
+import type { PresignedUrl, RequestOptions } from "@/models/index.js";
 
 test("Leap0Client wires services and supports direct access", async () => {
   const originalApiKey = process.env.LEAP0_API_KEY;
@@ -196,7 +196,7 @@ test("client and sandbox helpers stay strongly typed", () => {
   >();
   expectTypeOf<ReturnType<Sandbox["getUserHomeDir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();
-  expectTypeOf<ReturnType<Sandbox["createPresignedUrl"]>>().toMatchTypeOf<Promise<{ url: string }>>();
+  expectTypeOf<ReturnType<Sandbox["createPresignedUrl"]>>().toEqualTypeOf<Promise<PresignedUrl>>();
   expectTypeOf<Sandbox["templateName"]>().toEqualTypeOf<string | undefined>();
   expectTypeOf<Sandbox["timeoutMin"]>().toEqualTypeOf<number | undefined>();
   expectTypeOf<Sandbox["envVars"]>().toEqualTypeOf<Record<string, string> | undefined>();
