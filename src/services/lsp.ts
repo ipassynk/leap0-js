@@ -7,6 +7,14 @@ import type {
 import { Leap0Transport, jsonBody } from "@/core/transport.js";
 import { sandboxIdOf, toFileUri } from "@/core/utils.js";
 
+export type LspRequestParams = {
+  languageId: string;
+  pathToProject: string;
+  uri: string;
+  text?: string;
+  version?: number;
+};
+
 /**
  * Starts and interacts with language servers inside a sandbox.
  *
@@ -44,7 +52,7 @@ export class LspClient {
    */
   async start(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject">,
     options?: RequestOptions,
   ): Promise<LspResponse> {
     return await this.json(
@@ -64,7 +72,7 @@ export class LspClient {
    */
   async stop(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject">,
     options?: RequestOptions,
   ): Promise<LspResponse> {
     return await this.json(
@@ -94,13 +102,7 @@ export class LspClient {
    */
   async didOpen(
     sandbox: SandboxRef,
-    params: {
-      languageId: string;
-      pathToProject: string;
-      uri: string;
-      text?: string;
-      version?: number;
-    },
+    params: LspRequestParams,
     options?: RequestOptions,
   ): Promise<void> {
     const payload: Record<string, unknown> = {
@@ -125,13 +127,7 @@ export class LspClient {
    */
   async didOpenPath(
     sandbox: SandboxRef,
-    params: {
-      languageId: string;
-      pathToProject: string;
-      path: string;
-      text?: string;
-      version?: number;
-    },
+    params: Omit<LspRequestParams, "uri"> & { path: string },
     options?: RequestOptions,
   ): Promise<void> {
     await this.didOpen(
@@ -155,7 +151,7 @@ export class LspClient {
    */
   async didClose(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string; uri: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri">,
     options?: RequestOptions,
   ): Promise<void> {
     await this.transport.request(
@@ -180,7 +176,7 @@ export class LspClient {
    */
   async didClosePath(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string; path: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject"> & { path: string },
     options?: RequestOptions,
   ): Promise<void> {
     await this.didClose(
@@ -203,10 +199,7 @@ export class LspClient {
    */
   async completions(
     sandbox: SandboxRef,
-    params: {
-      languageId: string;
-      pathToProject: string;
-      uri: string;
+    params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri"> & {
       line: number;
       character: number;
     },
@@ -234,9 +227,7 @@ export class LspClient {
    */
   async completionsPath(
     sandbox: SandboxRef,
-    params: {
-      languageId: string;
-      pathToProject: string;
+    params: Pick<LspRequestParams, "languageId" | "pathToProject"> & {
       path: string;
       line: number;
       character: number;
@@ -265,7 +256,7 @@ export class LspClient {
    */
   async documentSymbols(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string; uri: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri">,
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
     return await this.json(
@@ -289,7 +280,7 @@ export class LspClient {
    */
   async documentSymbolsPath(
     sandbox: SandboxRef,
-    params: { languageId: string; pathToProject: string; path: string },
+    params: Pick<LspRequestParams, "languageId" | "pathToProject"> & { path: string },
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
     return await this.documentSymbols(

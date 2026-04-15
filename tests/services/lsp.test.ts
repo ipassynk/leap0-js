@@ -38,6 +38,8 @@ test("lsp client sends expected request shapes", async () => {
   });
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/lsp/start");
   assert.deepEqual(jsonOf(calls[0]!), { language_id: "typescript", path_to_project: "/workspace" });
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/lsp/stop");
+  assert.deepEqual(jsonOf(calls[1]!), { language_id: "typescript", path_to_project: "/workspace" });
   assert.deepEqual(jsonOf(calls[2]!), {
     language_id: "typescript",
     path_to_project: "/workspace",
@@ -45,11 +47,23 @@ test("lsp client sends expected request shapes", async () => {
     text: "const x = 1;",
     version: 1,
   });
+  assert.equal(calls[3]?.path, "/v1/sandbox/sb-1/lsp/did-close");
+  assert.deepEqual(jsonOf(calls[3]!), {
+    language_id: "typescript",
+    path_to_project: "/workspace",
+    uri: "file:///workspace/a.ts",
+  });
   assert.deepEqual(jsonOf(calls[4]!), {
     language_id: "typescript",
     path_to_project: "/workspace",
     uri: "file:///workspace/a.ts",
     position: { line: 1, character: 2 },
+  });
+  assert.equal(calls[5]?.path, "/v1/sandbox/sb-1/lsp/document-symbols");
+  assert.deepEqual(jsonOf(calls[5]!), {
+    language_id: "typescript",
+    path_to_project: "/workspace",
+    uri: "file:///workspace/a.ts",
   });
 });
 
