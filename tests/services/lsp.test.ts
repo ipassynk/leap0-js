@@ -7,21 +7,39 @@ import { createRecordedTransport, jsonOf } from "@tests/utils/helpers.ts";
 test("lsp client sends expected request shapes", async () => {
   const { transport, calls } = createRecordedTransport();
   const client = new LspClient(transport as never);
-  await client.start("sb-1", "typescript", "/workspace");
-  await client.stop("sb-1", "typescript", "/workspace");
+  await client.start("sb-1", { languageId: "typescript", pathToProject: "/workspace" });
+  await client.stop("sb-1", { languageId: "typescript", pathToProject: "/workspace" });
   await client.didOpenPath(
     "sb-1",
-    "typescript",
-    "/workspace",
-    "/workspace/a.ts",
-    "const x = 1;",
-    1,
+    {
+      languageId: "typescript",
+      pathToProject: "/workspace",
+      path: "/workspace/a.ts",
+      text: "const x = 1;",
+      version: 1,
+    },
   );
-  await client.didClosePath("sb-1", "typescript", "/workspace", "/workspace/a.ts");
-  await client.completionsPath("sb-1", "typescript", "/workspace", "/workspace/a.ts", 1, 2);
-  await client.documentSymbolsPath("sb-1", "typescript", "/workspace", "/workspace/a.ts");
+  await client.didClosePath("sb-1", {
+    languageId: "typescript",
+    pathToProject: "/workspace",
+    path: "/workspace/a.ts",
+  });
+  await client.completionsPath("sb-1", {
+    languageId: "typescript",
+    pathToProject: "/workspace",
+    path: "/workspace/a.ts",
+    line: 1,
+    character: 2,
+  });
+  await client.documentSymbolsPath("sb-1", {
+    languageId: "typescript",
+    pathToProject: "/workspace",
+    path: "/workspace/a.ts",
+  });
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/lsp/start");
   assert.deepEqual(jsonOf(calls[0]!), { language_id: "typescript", path_to_project: "/workspace" });
+  assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/lsp/stop");
+  assert.deepEqual(jsonOf(calls[1]!), { language_id: "typescript", path_to_project: "/workspace" });
   assert.deepEqual(jsonOf(calls[2]!), {
     language_id: "typescript",
     path_to_project: "/workspace",
@@ -29,11 +47,23 @@ test("lsp client sends expected request shapes", async () => {
     text: "const x = 1;",
     version: 1,
   });
+  assert.equal(calls[3]?.path, "/v1/sandbox/sb-1/lsp/did-close");
+  assert.deepEqual(jsonOf(calls[3]!), {
+    language_id: "typescript",
+    path_to_project: "/workspace",
+    uri: "file:///workspace/a.ts",
+  });
   assert.deepEqual(jsonOf(calls[4]!), {
     language_id: "typescript",
     path_to_project: "/workspace",
     uri: "file:///workspace/a.ts",
     position: { line: 1, character: 2 },
+  });
+  assert.equal(calls[5]?.path, "/v1/sandbox/sb-1/lsp/document-symbols");
+  assert.deepEqual(jsonOf(calls[5]!), {
+    language_id: "typescript",
+    path_to_project: "/workspace",
+    uri: "file:///workspace/a.ts",
   });
 });
 
@@ -44,16 +74,20 @@ test("lsp client throws a clear error for empty json responses", async () => {
   const client = new LspClient(transport as never);
 
   await assert.rejects(
-    () => client.start("sb-1", "typescript", "/workspace"),
+    () => client.start("sb-1", { languageId: "typescript", pathToProject: "/workspace" }),
     /Empty response from \/v1\/sandbox\/sb-1\/lsp\/start/,
   );
 });
 
-test("lsp didOpenPath keeps compatibility with options in the old slot", async () => {
+test("lsp didOpenPath accepts request options separately", async () => {
   const { transport, calls } = createRecordedTransport();
   const client = new LspClient(transport as never);
 
-  await client.didOpenPath("sb-1", "typescript", "/workspace", "/workspace/a.ts", { timeout: 5 });
+  await client.didOpenPath(
+    "sb-1",
+    { languageId: "typescript", pathToProject: "/workspace", path: "/workspace/a.ts" },
+    { timeout: 5 },
+  );
 
   assert.deepEqual(jsonOf(calls[0]!), {
     language_id: "typescript",

@@ -332,19 +332,17 @@ export class FilesystemClient {
    * Deletes a file or directory. Set `recursive` for non-empty directories.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param path File or directory path to delete.
-   * @param recursive Whether to delete directories recursively.
+   * @param params Delete parameters.
    * @param options Optional request settings such as timeout and query params.
    */
   async delete(
     sandbox: SandboxRef,
-    path: string,
-    recursive = false,
+    params: { path: string; recursive?: boolean },
     options: RequestOptions = {},
   ): Promise<void> {
     await this.transport.request(
       this.fsPath(sandbox, "delete"),
-      { method: "POST", body: jsonBody({ path, recursive }) },
+      { method: "POST", body: jsonBody({ path: params.path, recursive: params.recursive ?? false }) },
       options,
     );
   }
@@ -488,21 +486,24 @@ export class FilesystemClient {
    * Moves or renames a file or directory.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param srcPath Source path.
-   * @param dstPath Destination path.
-   * @param overwrite Whether to overwrite an existing destination.
+   * @param params Move parameters.
    * @param options Optional request settings such as timeout and query params.
    */
   async move(
     sandbox: SandboxRef,
-    srcPath: string,
-    dstPath: string,
-    overwrite = false,
+    params: { srcPath: string; dstPath: string; overwrite?: boolean },
     options: RequestOptions = {},
   ): Promise<void> {
     await this.transport.request(
       this.fsPath(sandbox, "move"),
-      { method: "POST", body: jsonBody({ src_path: srcPath, dst_path: dstPath, overwrite }) },
+      {
+        method: "POST",
+        body: jsonBody({
+          src_path: params.srcPath,
+          dst_path: params.dstPath,
+          overwrite: params.overwrite ?? false,
+        }),
+      },
       options,
     );
   }

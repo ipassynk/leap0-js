@@ -19,7 +19,7 @@ export class ProcessClient {
    * @param params Command execution parameters.
    * @param params.command Command line to execute.
    * @param params.cwd Optional working directory.
-   * @param params.timeout Optional command timeout in milliseconds.
+    * @param params.timeout Optional command timeout in seconds.
    * @param params.env Optional environment variables applied to the spawned process.
    * @param options Optional request settings such as timeout and query params.
    * @returns The process exit code and collected stdout/stderr output.

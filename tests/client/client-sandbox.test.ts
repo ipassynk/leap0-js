@@ -134,7 +134,7 @@ test("Sandbox binds service methods to itself", async () => {
   assert.equal(sandbox.invokeUrl("/healthz", 3000), "invoke:sb-1:/healthz:3000");
   assert.equal(await sandbox.getUserHomeDir(), "home:sb-1");
   assert.equal(await sandbox.getWorkdir(), "workdir:sb-1");
-  assert.equal((await sandbox.createPresignedUrl(8080, 15)).url, "https://tok_1.leap0.app");
+  assert.equal((await sandbox.createPresignedUrl({ port: 8080, expiresIn: 15 })).url, "https://tok_1.leap0.app");
   await sandbox.deletePresignedUrl("psu-1");
 });
 
@@ -192,13 +192,13 @@ test("client and sandbox helpers stay strongly typed", () => {
     [params: { command: string; cwd?: string; timeout?: number; env?: Record<string, string> }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["validateAccess"]>().parameters.toEqualTypeOf<
-    [id: string, password: string, options?: RequestOptions]
+    [params: { id: string; password: string }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["deleteAccess"]>().parameters.toEqualTypeOf<
-    [id: string, options?: RequestOptions]
+    [params: { id: string }, options?: RequestOptions]
   >();
   expectTypeOf<Sandbox["ssh"]["regenerateAccess"]>().parameters.toEqualTypeOf<
-    [id: string, options?: RequestOptions]
+    [params: { id: string }, options?: RequestOptions]
   >();
   expectTypeOf<ReturnType<Sandbox["getUserHomeDir"]>>().toEqualTypeOf<Promise<string>>();
   expectTypeOf<ReturnType<Sandbox["getWorkdir"]>>().toEqualTypeOf<Promise<string>>();

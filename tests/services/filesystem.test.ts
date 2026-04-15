@@ -39,7 +39,7 @@ test("filesystem client sends expected request shapes", async () => {
   await client.writeBytes("sb-1", "/tmp/b.bin", new Uint8Array([1, 2]));
   await client.readFile("sb-1", "/tmp/a.txt", { head: 10 });
   await client.readBytes("sb-1", "/tmp/b.bin");
-  await client.delete("sb-1", "/tmp/a.txt");
+  await client.delete("sb-1", { path: "/tmp/a.txt" });
   await client.setPermissions("sb-1", "/tmp/a.txt", { mode: "0755" });
   await client.setPermissions("sb-1", "/tmp/b.txt", { owner: "alice", group: "staff" });
   await client.glob("sb-1", "/workspace", "**/*.ts");
@@ -47,7 +47,7 @@ test("filesystem client sends expected request shapes", async () => {
   await client.editFile("sb-1", "/tmp/a.txt", [{ find: "a", replace: "b" }]);
   await client.editFiles("sb-1", { paths: ["/tmp/a.txt"], find: "a", replace: "b" });
   await client.editFiles("sb-1", { paths: ["/tmp/b.txt"], find: "x" });
-  await client.move("sb-1", "/tmp/a", "/tmp/b");
+  await client.move("sb-1", { srcPath: "/tmp/a", dstPath: "/tmp/b" });
   await client.copy("sb-1", "/tmp/b", "/tmp/c");
   const fileExists = await client.exists("sb-1", "/tmp/c");
   await client.tree("sb-1", "/workspace", { maxDepth: 2 });

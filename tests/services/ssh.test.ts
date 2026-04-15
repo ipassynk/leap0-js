@@ -22,9 +22,9 @@ test("ssh client sends expected request shapes", async () => {
   });
   const client = new SshClient(transport as never);
   await client.createAccess("sb-1");
-  await client.validateAccess("sb-1", "ssh-1", "secret");
-  await client.regenerateAccess("sb-1", "ssh-1");
-  await client.deleteAccess("sb-1", "ssh-1");
+  await client.validateAccess("sb-1", { id: "ssh-1", password: "secret" });
+  await client.regenerateAccess("sb-1", { id: "ssh-1" });
+  await client.deleteAccess("sb-1", { id: "ssh-1" });
   assert.equal(calls.length, 4);
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/ssh/access");
   assert.equal(calls[1]?.path, "/v1/sandbox/sb-1/ssh/ssh-1/validate");

@@ -212,17 +212,15 @@ export class Sandbox implements SandboxData {
   /**
    * Creates a temporary public URL for a specific sandbox port.
    *
-   * @param port Sandbox port to expose.
-   * @param expiresIn Optional expiration in seconds.
+   * @param params Presigned URL creation parameters.
    * @param options Optional request settings.
    * @returns The created presigned URL.
    */
   async createPresignedUrl(
-    port: number,
-    expiresIn?: number,
+    params: { port: number; expiresIn?: number },
     options?: { timeout?: number },
   ): Promise<PresignedUrl> {
-    return this.client.sandboxes.createPresignedUrl(this.id, { port, expiresIn }, options);
+    return this.client.sandboxes.createPresignedUrl(this.id, params, options);
   }
 
   /**
