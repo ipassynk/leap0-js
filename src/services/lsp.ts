@@ -34,39 +34,23 @@ export class LspClient {
     return result;
   }
 
-  private normalizeDidOpenArgs(
-    textOrOptions?: string | RequestOptions,
-    versionOrOptions?: number | RequestOptions,
-    options?: RequestOptions,
-  ): { text: string | undefined; version: number; options: RequestOptions | undefined } {
-    if (textOrOptions && typeof textOrOptions === "object") {
-      return { text: undefined, version: 1, options: textOrOptions };
-    }
-    if (versionOrOptions && typeof versionOrOptions === "object") {
-      return { text: textOrOptions, version: 1, options: versionOrOptions };
-    }
-    return { text: textOrOptions, version: versionOrOptions ?? 1, options };
-  }
-
   /**
    * Starts a language server for a project path inside the sandbox.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
+   * @param params Language server start parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The language server response payload.
    */
   async start(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
+    params: { languageId: string; pathToProject: string },
     options?: RequestOptions,
   ): Promise<LspResponse> {
     return await this.json(
       sandbox,
       "start",
-      { language_id: languageId, path_to_project: pathToProject },
+      { language_id: params.languageId, path_to_project: params.pathToProject },
       options,
     );
   }
@@ -74,21 +58,19 @@ export class LspClient {
    * Stops a previously started language server.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
+   * @param params Language server stop parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The language server response payload.
    */
   async stop(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
+    params: { languageId: string; pathToProject: string },
     options?: RequestOptions,
   ): Promise<LspResponse> {
     return await this.json(
       sandbox,
       "stop",
-      { language_id: languageId, path_to_project: pathToProject },
+      { language_id: params.languageId, path_to_project: params.pathToProject },
       options,
     );
   }
@@ -96,78 +78,71 @@ export class LspClient {
    * Opens a document in the language server.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param uri File URI to open.
-   * @param textOrOptions Optional in-memory document text, or request options when opening from disk.
-   * @param versionOrOptions Optional document version, or request options when no explicit version is needed.
+   * @param params Document open parameters.
    * @param options Optional request options.
    *
    * @example
    * ```ts
-   * await sandbox.lsp.didOpen(
-   *   "typescript",
-   *   "/workspace/app",
-   *   "file:///workspace/app/src/index.ts",
-   *   "const x = 1;",
-   *   1,
-   * );
+   * await sandbox.lsp.didOpen({
+   *   languageId: "typescript",
+   *   pathToProject: "/workspace/app",
+   *   uri: "file:///workspace/app/src/index.ts",
+   *   text: "const x = 1;",
+   *   version: 1,
+   * });
    * ```
    */
   async didOpen(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    uri: string,
-    textOrOptions?: string | RequestOptions,
-    versionOrOptions?: number | RequestOptions,
+    params: {
+      languageId: string;
+      pathToProject: string;
+      uri: string;
+      text?: string;
+      version?: number;
+    },
     options?: RequestOptions,
   ): Promise<void> {
-    const {
-      text,
-      version,
-      options: normalizedOptions,
-    } = this.normalizeDidOpenArgs(textOrOptions, versionOrOptions, options);
     const payload: Record<string, unknown> = {
-      language_id: languageId,
-      path_to_project: pathToProject,
-      uri,
-      version,
+      language_id: params.languageId,
+      path_to_project: params.pathToProject,
+      uri: params.uri,
+      version: params.version ?? 1,
     };
-    if (text !== undefined) payload.text = text;
+    if (params.text !== undefined) payload.text = params.text;
     await this.transport.request(
       `/v1/sandbox/${sandboxIdOf(sandbox)}/lsp/did-open`,
       { method: "POST", body: jsonBody(payload) },
-      normalizedOptions,
+      options,
     );
   }
   /**
    * Opens a document by filesystem path instead of a file URI.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param path Filesystem path to open.
-   * @param textOrOptions Optional in-memory document text, or request options when opening from disk.
-   * @param versionOrOptions Optional document version, or request options when no explicit version is needed.
+   * @param params Document open parameters using a filesystem path.
    * @param options Optional request options.
    */
   async didOpenPath(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    path: string,
-    textOrOptions?: string | RequestOptions,
-    versionOrOptions?: number | RequestOptions,
+    params: {
+      languageId: string;
+      pathToProject: string;
+      path: string;
+      text?: string;
+      version?: number;
+    },
     options?: RequestOptions,
   ): Promise<void> {
     await this.didOpen(
       sandbox,
-      languageId,
-      pathToProject,
-      toFileUri(path),
-      textOrOptions,
-      versionOrOptions,
+      {
+        languageId: params.languageId,
+        pathToProject: params.pathToProject,
+        uri: toFileUri(params.path),
+        text: params.text,
+        version: params.version,
+      },
       options,
     );
   }
@@ -175,23 +150,23 @@ export class LspClient {
    * Closes a previously opened document.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param uri File URI to close.
+   * @param params Document close parameters.
    * @param options Optional request settings such as timeout and query params.
    */
   async didClose(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    uri: string,
+    params: { languageId: string; pathToProject: string; uri: string },
     options?: RequestOptions,
   ): Promise<void> {
     await this.transport.request(
       `/v1/sandbox/${sandboxIdOf(sandbox)}/lsp/did-close`,
       {
         method: "POST",
-        body: jsonBody({ language_id: languageId, path_to_project: pathToProject, uri }),
+        body: jsonBody({
+          language_id: params.languageId,
+          path_to_project: params.pathToProject,
+          uri: params.uri,
+        }),
       },
       options,
     );
@@ -200,49 +175,51 @@ export class LspClient {
    * Closes a document by filesystem path instead of a file URI.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param path Filesystem path to close.
+   * @param params Document close parameters using a filesystem path.
    * @param options Optional request settings such as timeout and query params.
    */
   async didClosePath(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    path: string,
+    params: { languageId: string; pathToProject: string; path: string },
     options?: RequestOptions,
   ): Promise<void> {
-    await this.didClose(sandbox, languageId, pathToProject, toFileUri(path), options);
+    await this.didClose(
+      sandbox,
+      {
+        languageId: params.languageId,
+        pathToProject: params.pathToProject,
+        uri: toFileUri(params.path),
+      },
+      options,
+    );
   }
   /**
    * Requests completion items at a line/character position.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param uri File URI to inspect.
-   * @param line Zero-based line number.
-   * @param character Zero-based character offset.
+   * @param params Completion request parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The raw JSON-RPC response from the language server.
    */
   async completions(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    uri: string,
-    line: number,
-    character: number,
+    params: {
+      languageId: string;
+      pathToProject: string;
+      uri: string;
+      line: number;
+      character: number;
+    },
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
     return await this.json(
       sandbox,
       "completions",
       {
-        language_id: languageId,
-        path_to_project: pathToProject,
-        uri,
-        position: { line, character },
+        language_id: params.languageId,
+        path_to_project: params.pathToProject,
+        uri: params.uri,
+        position: { line: params.line, character: params.character },
       },
       options,
     );
@@ -251,30 +228,30 @@ export class LspClient {
    * Requests completion items for a filesystem path.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param path Filesystem path to inspect.
-   * @param line Zero-based line number.
-   * @param character Zero-based character offset.
+   * @param params Completion request parameters using a filesystem path.
    * @param options Optional request settings such as timeout and query params.
    * @returns The raw JSON-RPC response from the language server.
    */
   async completionsPath(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    path: string,
-    line: number,
-    character: number,
+    params: {
+      languageId: string;
+      pathToProject: string;
+      path: string;
+      line: number;
+      character: number;
+    },
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
     return await this.completions(
       sandbox,
-      languageId,
-      pathToProject,
-      toFileUri(path),
-      line,
-      character,
+      {
+        languageId: params.languageId,
+        pathToProject: params.pathToProject,
+        uri: toFileUri(params.path),
+        line: params.line,
+        character: params.character,
+      },
       options,
     );
   }
@@ -282,23 +259,23 @@ export class LspClient {
    * Returns document symbols for an open document.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param uri File URI to inspect.
+   * @param params Document symbol request parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The raw JSON-RPC response from the language server.
    */
   async documentSymbols(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    uri: string,
+    params: { languageId: string; pathToProject: string; uri: string },
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
     return await this.json(
       sandbox,
       "document-symbols",
-      { language_id: languageId, path_to_project: pathToProject, uri },
+      {
+        language_id: params.languageId,
+        path_to_project: params.pathToProject,
+        uri: params.uri,
+      },
       options,
     );
   }
@@ -306,19 +283,23 @@ export class LspClient {
    * Returns document symbols for a filesystem path.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param languageId Language server identifier.
-   * @param pathToProject Project path inside the sandbox.
-   * @param path Filesystem path to inspect.
+   * @param params Document symbol request parameters using a filesystem path.
    * @param options Optional request settings such as timeout and query params.
    * @returns The raw JSON-RPC response from the language server.
    */
   async documentSymbolsPath(
     sandbox: SandboxRef,
-    languageId: string,
-    pathToProject: string,
-    path: string,
+    params: { languageId: string; pathToProject: string; path: string },
     options?: RequestOptions,
   ): Promise<LspJsonRpcResponse> {
-    return await this.documentSymbols(sandbox, languageId, pathToProject, toFileUri(path), options);
+    return await this.documentSymbols(
+      sandbox,
+      {
+        languageId: params.languageId,
+        pathToProject: params.pathToProject,
+        uri: toFileUri(params.path),
+      },
+      options,
+    );
   }
 }

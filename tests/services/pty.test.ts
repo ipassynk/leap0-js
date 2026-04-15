@@ -69,7 +69,7 @@ test("pty client sends expected request shapes", async () => {
   await client.list("sb-1");
   await client.create("sb-1", { sessionId: "sess-1", cols: 80, rows: 24, cwd: "/workspace" });
   await client.get("sb-1", "sess-1");
-  await client.resize("sb-1", "sess-1", 120, 40);
+  await client.resize("sb-1", { sessionId: "sess-1", cols: 120, rows: 40 });
   await client.delete("sb-1", "sess-1");
   assert.equal(calls[0]?.path, "/v1/sandbox/sb-1/pty");
   assert.equal(calls[0]?.init.method, "GET");

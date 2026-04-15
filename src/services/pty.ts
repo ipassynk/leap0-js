@@ -176,22 +176,18 @@ export class PtyClient {
    * Resizes an existing PTY session.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param sessionId PTY session identifier.
-   * @param cols Terminal column count.
-   * @param rows Terminal row count.
+   * @param params Resize parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The updated PTY session.
    */
   async resize(
     sandbox: SandboxRef,
-    sessionId: string,
-    cols: number,
-    rows: number,
+    params: { sessionId: string; cols: number; rows: number },
     options: RequestOptions = {},
   ): Promise<PtySession> {
     const data = await this.transport.requestJson(
-      `/v1/sandbox/${sandboxIdOf(sandbox)}/pty/${encodeURIComponent(sessionId)}/resize`,
-      { method: "POST", body: jsonBody({ cols, rows }) },
+      `/v1/sandbox/${sandboxIdOf(sandbox)}/pty/${encodeURIComponent(params.sessionId)}/resize`,
+      { method: "POST", body: jsonBody({ cols: params.cols, rows: params.rows }) },
       options,
     );
     return normalize(ptySessionSchema, data);

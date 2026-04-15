@@ -8,16 +8,16 @@ async function main(): Promise<void> {
   try {
     const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
     try {
-      await sandbox.desktop.waitUntilReady(60);
+      await sandbox.desktop.waitUntilReady({ timeout: 60 });
       console.log("Desktop:", sandbox.desktop.desktopUrl());
 
       const display = await sandbox.desktop.displayInfo();
       console.log("Display:", display);
 
-      await sandbox.desktop.movePointer(
-        Math.floor(display.width / 2),
-        Math.floor(display.height / 2),
-      );
+      await sandbox.desktop.movePointer({
+        x: Math.floor(display.width / 2),
+        y: Math.floor(display.height / 2),
+      });
       await sandbox.desktop.click({ button: 1 });
 
       const screenshot = await sandbox.desktop.screenshot();

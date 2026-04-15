@@ -9,10 +9,10 @@ async function main(): Promise<void> {
       const access = await sandbox.ssh.createAccess();
       console.log("ssh command:", access.sshCommand);
 
-      const validation = await sandbox.ssh.validateAccess(access.id, access.password);
+      const validation = await sandbox.ssh.validateAccess({ id: access.id, password: access.password });
       console.log("ssh valid:", validation.valid);
 
-      const rotated = await sandbox.ssh.regenerateAccess(access.id);
+      const rotated = await sandbox.ssh.regenerateAccess({ id: access.id });
       console.log("rotated ssh command:", rotated.sshCommand);
     } finally {
       await sandbox.delete();

@@ -69,7 +69,7 @@ test("desktop client sends expected request shapes", async () => {
   const client = new DesktopClient(transport as never);
   await client.displayInfo("sb-1");
   await client.resizeScreen("sb-1", { width: 1280, height: 720 });
-  await client.movePointer("sb-1", 10, 20);
+  await client.movePointer("sb-1", { x: 10, y: 20 });
   await client.typeText("sb-1", "hello");
   await client.getProcess("sb-1", "x11vnc");
   await client.drag("sb-1", { fromX: 1, fromY: 2, toX: 3, toY: 4 });
@@ -170,7 +170,7 @@ test("desktop waitUntilReady treats count-only updates as ready", async () => {
   });
   const client = new DesktopClient(transport as never);
 
-  await client.waitUntilReady("sb-1", 1);
+  await client.waitUntilReady("sb-1", { timeout: 1 });
 });
 
 test("desktop waitUntilReady forwards request timeout options", async () => {
@@ -195,7 +195,7 @@ test("desktop waitUntilReady forwards request timeout options", async () => {
   });
   const client = new DesktopClient(transport as never);
 
-  await client.waitUntilReady("sb-1", 5, { timeout: 2 });
+  await client.waitUntilReady("sb-1", { timeout: 5 }, { timeout: 2 });
 
   assert.equal(calls.length, 1);
   assert.equal(calls[0]?.options.timeout, 2);
@@ -233,7 +233,7 @@ test("desktop waitUntilReady ignores zero total count updates", async () => {
   });
   const client = new DesktopClient(transport as never);
 
-  await client.waitUntilReady("sb-1", 1);
+  await client.waitUntilReady("sb-1", { timeout: 1 });
 });
 
 test("desktop client validates request payloads before transport", async () => {

@@ -216,22 +216,20 @@ export class DesktopClient {
    * Moves the desktop pointer to a coordinate.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param x Horizontal coordinate.
-   * @param y Vertical coordinate.
+   * @param params Pointer move parameters.
    * @param options Optional request settings such as timeout and query params.
    * @returns The updated pointer position.
    */
   async movePointer(
     sandbox: SandboxRef,
-    x: number,
-    y: number,
+    params: { x: number; y: number },
     options?: RequestOptions,
   ): Promise<DesktopPointerPosition> {
     return this.requestJson(
       sandbox,
       desktopPointerPositionSchema,
       "/api/input/move",
-      { method: "POST", body: jsonBody({ x, y }) },
+      { method: "POST", body: jsonBody({ x: params.x, y: params.y }) },
       options,
     );
   }
@@ -640,7 +638,7 @@ export class DesktopClient {
    * Waits until the desktop reports a running state or all tracked processes are up.
    *
    * @param sandbox Sandbox ID or sandbox-like object.
-   * @param timeout Timeout in seconds.
+   * @param params Wait parameters.
    * @param options Optional request settings such as timeout and query params.
    * @throws {Leap0Error} If the desktop never becomes ready or a non-retryable error occurs.
    *
@@ -649,7 +647,12 @@ export class DesktopClient {
    * await sandbox.desktop.waitUntilReady();
    * ```
    */
-  async waitUntilReady(sandbox: SandboxRef, timeout = 60, options: RequestOptions = {}): Promise<void> {
+  async waitUntilReady(
+    sandbox: SandboxRef,
+    params: { timeout?: number } = {},
+    options: RequestOptions = {},
+  ): Promise<void> {
+    const timeout = params.timeout ?? 60;
     const deadline = Date.now() + timeout * 1000;
     let lastError: unknown;
 

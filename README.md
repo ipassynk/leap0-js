@@ -134,11 +134,10 @@ console.log(access.hostname, access.port, access.username);
 
 ### Presigned URLs
 
-Create a temporary public URL for a sandbox port. The optional second argument to
-`createPresignedUrl(port, expiresIn)` is `expiresIn` in seconds.
+Create a temporary public URL for a sandbox port. `expiresIn` is in seconds.
 
 ```ts
-const presigned = await sandbox.createPresignedUrl(8080, 900); // 15 minutes
+const presigned = await sandbox.createPresignedUrl({ port: 8080, expiresIn: 900 }); // 15 minutes
 console.log(presigned.url);
 
 await sandbox.deletePresignedUrl(presigned.id);
